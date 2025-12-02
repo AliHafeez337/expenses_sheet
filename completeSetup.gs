@@ -49,7 +49,7 @@ function updateControlPanelSummaries() {
   };
   
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1;
+    var baseCol = 2 + (day - 1) * 4 + 1; // SHIFTED: was 3, now 2
     dayColumns.personal.push(getColumnLetter(baseCol + 1));
     dayColumns.family.push(getColumnLetter(baseCol + 2));
     dayColumns.donation.push(getColumnLetter(baseCol + 3));
@@ -58,12 +58,12 @@ function updateControlPanelSummaries() {
   var meRows = [];
   var wifeRows = [];
   
-  for (var row = 28; row <= lastRow; row++) { // CHANGED FROM 27 TO 28
-    var note = sheet.getRange(row, 2).getNote();
+  for (var row = 28; row <= lastRow; row++) {
+    var note = sheet.getRange(row, 1).getNote(); // CHANGED: column 2 to 1
     if (note === '[Me]') {
-      meRows.push('C' + row);
+      meRows.push('B' + row); // CHANGED: C to B
     } else if (note === '[Wife]') {
-      wifeRows.push('C' + row);
+      wifeRows.push('B' + row); // CHANGED: C to B
     }
   }
   
@@ -79,8 +79,8 @@ function updateControlPanelSummaries() {
   var myDonationTerms = [];
   var wifeDonationTerms = [];
   
-  for (var row = 28; row <= lastRow; row++) { // CHANGED FROM 27 TO 28
-    var note = sheet.getRange(row, 2).getNote();
+  for (var row = 28; row <= lastRow; row++) {
+    var note = sheet.getRange(row, 1).getNote(); // CHANGED: column 2 to 1
     if (note === '[Me]') {
       dayColumns.donation.forEach(function(col) {
         myDonationTerms.push(col + row);
@@ -109,7 +109,7 @@ function applyGrandTotalFormulas() {
   // Find all category total rows
   var categoryTotalRows = [];
   for (var row = 27; row <= lastRow; row++) {
-    var note = sheet.getRange(row, 2).getNote();
+    var note = sheet.getRange(row, 1).getNote(); // CHANGED: column 2 to 1
     if (note === '[CategoryTotal]') {
       categoryTotalRows.push(row);
     }
@@ -119,16 +119,16 @@ function applyGrandTotalFormulas() {
     return; // No category totals found
   }
   
-  // Monthly Grand Total (Column C) = Sum of all category totals
+  // Monthly Grand Total (Column B) = Sum of all category totals - CHANGED: was C, now B
   var monthlyTerms = [];
   for (var i = 0; i < categoryTotalRows.length; i++) {
-    monthlyTerms.push('C' + categoryTotalRows[i]);
+    monthlyTerms.push('B' + categoryTotalRows[i]); // CHANGED: C to B
   }
-  sheet.getRange('C26').setFormula('=' + monthlyTerms.join('+'));
+  sheet.getRange('B26').setFormula('=' + monthlyTerms.join('+')); // CHANGED: C26 to B26
   
   // For each day, sum all category totals
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1; // Day 1 starts at column D (4)
+    var baseCol = 2 + (day - 1) * 4 + 1; // SHIFTED: Day 1 starts at column C (3) - was D (4)
     
     // Day Total = Sum of all category day totals
     var dayTotalTerms = [];
@@ -163,7 +163,7 @@ function applyGrandTotalFormulas() {
 function setupHeaders() {
   var sheet = SpreadsheetApp.getActiveSheet();
   
-  var headers = ['Category', 'Subcategory', 'Monthly Total'];
+  var headers = ['Category/Subcategory', 'Monthly Total'];
   
   // Add headers for 31 days - 4 columns per day
   for (var day = 1; day <= 31; day++) {
@@ -186,12 +186,11 @@ function setupHeaders() {
     .setWrap(true);
   
   // Set column widths
-  sheet.setColumnWidth(1, 150); // Category
-  sheet.setColumnWidth(2, 150); // Subcategory
-  sheet.setColumnWidth(3, 120); // Monthly Total
+  sheet.setColumnWidth(1, 180); // Category/Subcategory (wider now)
+  sheet.setColumnWidth(2, 120); // Monthly Total
   
   // Set width for all day columns
-  for (var col = 4; col <= headers.length; col++) {
+  for (var col = 3; col <= headers.length; col++) {
     sheet.setColumnWidth(col, 85);
   }
 }
@@ -280,41 +279,41 @@ function setupCategories() {
   for (var i = 0; i < categories.length; i++) {
     var cat = categories[i];
     
-    // Category header row - highlight entire row and CLEAR columns C, D, E onward
+    // Category header row - highlight entire row and CLEAR columns B, C onward
     sheet.getRange(currentRow, 1).setValue(cat.name);
     sheet.getRange(currentRow, 1, 1, sheet.getMaxColumns())
       .setBackground('#d9d9d9')
       .setFontWeight('bold')
       .setFontSize(11);
     
-    // Clear columns C, D, E and all day columns for category header
-    sheet.getRange(currentRow, 3, 1, sheet.getMaxColumns() - 2).clearContent();
+    // Clear columns B, C and all day columns for category header
+    sheet.getRange(currentRow, 2, 1, sheet.getMaxColumns() - 1).clearContent();
     
     currentRow++;
     
     // Each subcategory takes 4 rows
     for (var j = 0; j < cat.subcats.length; j++) {
-      // Row 1: Subcategory name with [Totals]
-      sheet.getRange(currentRow, 2).setValue(cat.subcats[j]);
-      sheet.getRange(currentRow, 2).setNote('[Totals]');
+      // Row 1: Subcategory name with [Totals] - NOW IN COLUMN A
+      sheet.getRange(currentRow, 1).setValue(cat.subcats[j]);
+      sheet.getRange(currentRow, 1).setNote('[Totals]');
       currentRow++;
       
-      // Row 2: [Me]
-      sheet.getRange(currentRow, 2).setNote('[Me]');
+      // Row 2: [Me] - NOW IN COLUMN A
+      sheet.getRange(currentRow, 1).setNote('[Me]');
       currentRow++;
       
-      // Row 3: [Wife]
-      sheet.getRange(currentRow, 2).setNote('[Wife]');
+      // Row 3: [Wife] - NOW IN COLUMN A
+      sheet.getRange(currentRow, 1).setNote('[Wife]');
       currentRow++;
       
-      // Row 4: [Comment]
-      sheet.getRange(currentRow, 2).setNote('[Comment]');
+      // Row 4: [Comment] - NOW IN COLUMN A
+      sheet.getRange(currentRow, 1).setNote('[Comment]');
       currentRow++;
     }
     
     // Add Category Totals Row
-    sheet.getRange(currentRow, 2).setValue(cat.name + ' TOTAL');
-    sheet.getRange(currentRow, 2).setNote('[CategoryTotal]');
+    sheet.getRange(currentRow, 1).setValue(cat.name + ' TOTAL');
+    sheet.getRange(currentRow, 1).setNote('[CategoryTotal]');
     sheet.getRange(currentRow, 1, 1, sheet.getMaxColumns())
       .setBackground('#b8b8b8')
       .setFontWeight('bold')
@@ -375,8 +374,8 @@ function applyDataFormulas(startRow, lastRow) {
     var batchEnd = Math.min(batchStart + batchSize - 1, lastRow);
     
     for (var row = batchStart; row <= batchEnd; row++) {
-      var subcatVal = sheet.getRange(row, 2).getValue();
-      var note = sheet.getRange(row, 2).getNote();
+      var subcatVal = sheet.getRange(row, 1).getValue(); // CHANGED: column 2 to 1
+      var note = sheet.getRange(row, 1).getNote(); // CHANGED: column 2 to 1
       
       if (note === '[Totals]' && subcatVal !== '') {
         applyTotalsRowFormulas(row, sheet);
@@ -396,13 +395,18 @@ function applyDataFormulas(startRow, lastRow) {
 function applyCategoryTotalsRowFormulas(row, sheet) {
   var totalsRows = [];
   
-  for (var r = row - 1; r >= 27; r--) { // CHANGED FROM 26 TO 27
-    var cellVal = sheet.getRange(r, 1).getValue();
+  for (var r = row - 1; r >= 27; r--) {
+    var cellVal = sheet.getRange(r, 1).getValue(); // Check column A
     if (cellVal !== '') {
-      break;
+      // Check if this is a category header (not a subcategory)
+      var note = sheet.getRange(r, 1).getNote();
+      if (!note || note === '') {
+        // This is a category header with no note, stop here
+        break;
+      }
     }
     
-    var note = sheet.getRange(r, 2).getNote();
+    var note = sheet.getRange(r, 1).getNote(); // CHANGED: column 2 to 1
     if (note === '[Totals]') {
       totalsRows.push(r);
     }
@@ -412,13 +416,13 @@ function applyCategoryTotalsRowFormulas(row, sheet) {
     var monthlyFormula = '=';
     var monthlyTerms = [];
     for (var i = 0; i < totalsRows.length; i++) {
-      monthlyTerms.push('C' + totalsRows[i]);
+      monthlyTerms.push('B' + totalsRows[i]); // CHANGED: C to B
     }
-    sheet.getRange(row, 3).setFormula(monthlyFormula + monthlyTerms.join('+'));
+    sheet.getRange(row, 2).setFormula(monthlyFormula + monthlyTerms.join('+')); // CHANGED: column 3 to 2
   }
   
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1;
+    var baseCol = 2 + (day - 1) * 4 + 1; // SHIFTED: was 3, now 2
     
     if (totalsRows.length > 0) {
       var dayTotalTerms = [];
@@ -451,13 +455,13 @@ function applyCategoryTotalsRowFormulas(row, sheet) {
 function applyTotalsRowFormulas(row, sheet) {
   var monthlyTerms = [];
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1;
+    var baseCol = 2 + (day - 1) * 4 + 1; // SHIFTED: was 3, now 2
     monthlyTerms.push(getColumnLetter(baseCol) + row);
   }
-  sheet.getRange(row, 3).setFormula('=' + monthlyTerms.join('+'));
+  sheet.getRange(row, 2).setFormula('=' + monthlyTerms.join('+')); // CHANGED: column 3 to 2
   
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1;
+    var baseCol = 2 + (day - 1) * 4 + 1; // SHIFTED: Column C for Day 1
     var meRow = row + 1;
     var wifeRow = row + 2;
     
@@ -487,13 +491,13 @@ function applyTotalsRowFormulas(row, sheet) {
 function applyMeRowFormulas(row, sheet) {
   var monthlyTerms = [];
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1;
+    var baseCol = 2 + (day - 1) * 4 + 1; // SHIFTED: was 3, now 2
     monthlyTerms.push(getColumnLetter(baseCol) + row);
   }
-  sheet.getRange(row, 3).setFormula('=' + monthlyTerms.join('+'));
+  sheet.getRange(row, 2).setFormula('=' + monthlyTerms.join('+')); // CHANGED: column 3 to 2
   
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1;
+    var baseCol = 2 + (day - 1) * 4 + 1; // SHIFTED: was 3, now 2
     
     var myDayTotalFormula = '=' + 
       getColumnLetter(baseCol + 1) + row + '+' + 
@@ -506,13 +510,13 @@ function applyMeRowFormulas(row, sheet) {
 function applyWifeRowFormulas(row, sheet) {
   var monthlyTerms = [];
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1;
+    var baseCol = 2 + (day - 1) * 4 + 1; // SHIFTED: was 3, now 2
     monthlyTerms.push(getColumnLetter(baseCol) + row);
   }
-  sheet.getRange(row, 3).setFormula('=' + monthlyTerms.join('+'));
+  sheet.getRange(row, 2).setFormula('=' + monthlyTerms.join('+')); // CHANGED: column 3 to 2
   
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1;
+    var baseCol = 2 + (day - 1) * 4 + 1; // SHIFTED: was 3, now 2
     
     var wifeDayTotalFormula = '=' + 
       getColumnLetter(baseCol + 1) + row + '+' + 
@@ -535,14 +539,14 @@ function applyFormatting() {
     ['#F0E6FF', '#E0D6FF', '#D0C6FF']
   ];
   
-  // Apply colors to input cells ([Me] and [Wife] rows) - CHANGED FROM 26 TO 27
+  // Apply colors to input cells ([Me] and [Wife] rows)
   for (var row = 27; row <= lastRow; row++) {
-    var note = sheet.getRange(row, 2).getNote();
+    var note = sheet.getRange(row, 1).getNote(); // CHANGED: column 2 to 1
     
     if (note === '[Me]' || note === '[Wife]') {
       for (var day = 1; day <= 31; day++) {
         var colorSet = dayColors[(day - 1) % dayColors.length];
-        var baseCol = 4 + (day - 1) * 4;
+        var baseCol = 3 + (day - 1) * 4; // SHIFTED: Day 1 starts at column 3 (C) - was 4 (D)
         
         sheet.getRange(row, baseCol + 1).setBackground(colorSet[0]);
         sheet.getRange(row, baseCol + 2).setBackground(colorSet[1]);
@@ -553,44 +557,72 @@ function applyFormatting() {
     // Apply text formatting to comment rows
     if (note === '[Comment]') {
       for (var day = 1; day <= 31; day++) {
-        var baseCol = 4 + (day - 1) * 4;
+        var baseCol = 3 + (day - 1) * 4; // SHIFTED: was 4, now 3
         
         // Set background color for comment cells (light yellow)
         sheet.getRange(row, baseCol + 1).setBackground('#FFFEF0');
         sheet.getRange(row, baseCol + 2).setBackground('#FFFEF0');
         sheet.getRange(row, baseCol + 3).setBackground('#FFFEF0');
         
-        // Set number format to plain text - this forces text input
-        sheet.getRange(row, baseCol + 1).setNumberFormat('@STRING@');
-        sheet.getRange(row, baseCol + 2).setNumberFormat('@STRING@');
-        sheet.getRange(row, baseCol + 3).setNumberFormat('@STRING@');
+        // Set number format to plain text
+        sheet.getRange(row, baseCol + 1).setNumberFormat('@');
+        sheet.getRange(row, baseCol + 2).setNumberFormat('@');
+        sheet.getRange(row, baseCol + 3).setNumberFormat('@');
+        
+        // Add data validation to force text input (this triggers text keyboard on mobile)
+        var textValidation = SpreadsheetApp.newDataValidation()
+          .requireFormulaSatisfied('=TRUE')
+          .setAllowInvalid(true)
+          .setHelpText('Enter comment text')
+          .build();
+        
+        sheet.getRange(row, baseCol + 1).setDataValidation(textValidation);
+        sheet.getRange(row, baseCol + 2).setDataValidation(textValidation);
+        sheet.getRange(row, baseCol + 3).setDataValidation(textValidation);
       }
     }
   }
   
-  // Protect category header rows - CHANGED FROM 26 TO 27
+  // Protect category header rows
   for (var row = 27; row <= lastRow; row++) {
     var categoryVal = sheet.getRange(row, 1).getValue();
-    if (categoryVal !== '') {
-      sheet.getRange(row, 3, 1, lastCol - 2).setBackground('#d9d9d9');
+    var note = sheet.getRange(row, 1).getNote();
+    // Category headers have values but no notes
+    if (categoryVal !== '' && !note) {
+      sheet.getRange(row, 2, 1, lastCol - 1).setBackground('#d9d9d9'); // CHANGED: column 3 to 2
     }
   }
   
   // Format grand total row (row 26) with light green and make it stand out
-  sheet.getRange(26, 3, 1, lastCol - 2)
+  sheet.getRange(26, 2, 1, lastCol - 1) // CHANGED: column 3 to 2
     .setBackground('#d9ead3')
     .setFontWeight('bold');
   
-  // Format totals as currency - CHANGED FROM 27 TO 28
-  sheet.getRange(28, 3, lastRow - 27, 1).setNumberFormat('"PKR "#,##0.00');
+  // Format totals as currency
+  sheet.getRange(28, 2, lastRow - 27, 1).setNumberFormat('"PKR "#,##0.00'); // CHANGED: column 3 to 2
   
   // Number formatting for grand total row
-  sheet.getRange(26, 3, 1, lastCol - 2).setNumberFormat('"PKR "#,##0.00');
+  sheet.getRange(26, 2, 1, lastCol - 1).setNumberFormat('"PKR "#,##0.00'); // CHANGED: column 3 to 2
   
   // Number formatting for all day columns
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 4 + (day - 1) * 4;
+    var baseCol = 3 + (day - 1) * 4; // SHIFTED: was 4, now 3
     sheet.getRange(27, baseCol, lastRow - 26, 4).setNumberFormat('"PKR "#,##0.00');
+  }
+  
+  // RE-APPLY text formatting to comment rows (after currency formatting above)
+  // This ensures comment cells show alphabetic keyboard on mobile devices
+  for (var row = 27; row <= lastRow; row++) {
+    var note = sheet.getRange(row, 1).getNote();
+    if (note === '[Comment]') {
+      for (var day = 1; day <= 31; day++) {
+        var baseCol = 3 + (day - 1) * 4;
+        // Force text format - this triggers alphabetic keyboard on mobile
+        sheet.getRange(row, baseCol + 1).setNumberFormat('@');
+        sheet.getRange(row, baseCol + 2).setNumberFormat('@');
+        sheet.getRange(row, baseCol + 3).setNumberFormat('@');
+      }
+    }
   }
   
   // Number formatting for control panel
@@ -604,8 +636,8 @@ function setFreezePanes() {
   // Freeze only row 1 (header)
   sheet.setFrozenRows(1);
   
-  // Freeze only columns A-B (Category, Subcategory)
-  sheet.setFrozenColumns(2);
+  // Freeze only column A (Category/Subcategory) - CHANGED: was 2, now 1
+  sheet.setFrozenColumns(1);
 }
 
 // Helper function to get column letter from number

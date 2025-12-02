@@ -1,0 +1,35 @@
+// Most Frequent Daily Expenses
+Food & Groceries: Groceries, Fruits, Vegetables, Meat/Chicken, Dairy, Bakery, Dry Fruits, Snacks, Other
+Dining & Orders: Restaurants, Fast Food, Online Orders, Bring Home, Cafe/Tea, Picnic Food, Other
+
+// Personal & Routine
+Personal Care: Clothes, Shoes, Barber/Salon, Cosmetics, Accessories, Laundry, Other
+Fragrances: Perfumes, Attars, Body Sprays, Room Sprays, Air Fresheners, Incense, Other
+
+// Household
+Household Essentials: Drinking Water, Batteries, Cleaning Supplies, Toiletries, Kitchen Items, Detergents, Tissues/Paper, Other
+Home Maintenance: Repairs, Plumbing, Electrical, Painting, Furniture, Appliances, Decorations, Other
+
+// Family & Pets
+Children: Clothing, Diapers, Baby Food, Toys, Skin Care, School Supplies, Activities, Other
+Cat Care: Cat Food, Litter, Vet Visits, Grooming, Toys, Medications, Accessories, Other
+Pocket Money: Mother, Wife, Children, Maid, Helper, Other
+
+// Health
+Health & Medical: Doctor Visits, Dental/Vision, Lab Tests, Pharmacy, Emergency, Vitamins/Supplements, Medical Equipment, Other
+
+// Transportation & Utilities
+Transportation: Fuel/Petrol, Car Maintenance, Car Wash, Toll Tax, Parking, Public Transport, Ride Sharing, Other
+Utilities & Bills: Electricity, Gas, Water Bill, Internet, Mobile Packages, TV/Cable, Landline, Other
+
+// Gifts & Charity
+Gifts & Charity: Birthday Gifts, Wedding Gifts, Festival Gifts, Charity/Donations, Zakat, Sadaqah, Other
+
+// Less Frequent
+Books & Learning: Books, Magazines, Courses, Online Learning, Stationery, Other
+Education: School Fees, Tuition, Uniforms, Transport, School Supplies, Other
+Technology: Electronics, Gadgets, Accessories, Repairs, Software, Apps, Cloud Storage, Other
+Subscriptions: Streaming Services, Online Services, Insurance Premium, Memberships, Other
+
+// Rare/Occasional
+Miscellaneous: Emergency Expenses, Unexpected, Lost/Damaged Items, Fines/Penalties, Miscellaneous, Other

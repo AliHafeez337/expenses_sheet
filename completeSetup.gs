@@ -266,14 +266,52 @@ function setupCategories() {
   var startRow = 27; // CHANGED FROM 26 TO 27
   var currentRow = startRow;
   
+  // var categories = [
+  //   {name: 'Personal Expenses', subcats: ['Groceries', 'Restaurants', 'Bring food item', 'Clothes', 'Fruits', 'Other Food', 'Personal care', 'AK personal food', 'AG food', 'Picnic', 'Other']},
+  //   {name: 'Children', subcats: ['Clothing', 'Skin Care', 'Diaper', 'Other']},
+  //   {name: 'Gifts', subcats: ['Gifts', 'Donations', 'Other']},
+  //   {name: 'Health/medical', subcats: ['Doctors/dental/vision', 'Test', 'Pharmacy', 'Emergency', 'Other']},
+  //   {name: 'Home', subcats: ['Wife', 'Iron helper', 'Other']},
+  //   {name: 'Transportation', subcats: ['Fuel', 'Car maintenance', 'Toll tax', 'Public transport', 'Other']},
+  //   {name: 'Utilities', subcats: ['Mobile Packages', 'Other']}
+  // ];
+
   var categories = [
-    {name: 'Personal Expenses', subcats: ['Groceries', 'Restaurants', 'Bring food item', 'Clothes', 'Fruits', 'Other Food', 'Personal care', 'AK personal food', 'AG food', 'Picnic', 'Other']},
-    {name: 'Children', subcats: ['Clothing', 'Skin Care', 'Diaper', 'Other']},
-    {name: 'Gifts', subcats: ['Gifts', 'Donations', 'Other']},
-    {name: 'Health/medical', subcats: ['Doctors/dental/vision', 'Test', 'Pharmacy', 'Emergency', 'Other']},
-    {name: 'Home', subcats: ['Wife', 'Iron helper', 'Other']},
-    {name: 'Transportation', subcats: ['Fuel', 'Car maintenance', 'Toll tax', 'Public transport', 'Other']},
-    {name: 'Utilities', subcats: ['Mobile Packages', 'Other']}
+    // Most Frequent Daily Expenses
+    {name: 'Food & Groceries', subcats: ['Groceries', 'Fruits', 'Vegetables', 'Meat/Chicken', 'Dairy', 'Bakery', 'Dry Fruits', 'Snacks', 'Other']},
+    {name: 'Dining & Orders', subcats: ['Restaurants', 'Fast Food', 'Online Orders', 'Bring Home', 'Cafe/Tea', 'Picnic Food', 'Other']},
+    
+  //   // Personal & Routine
+  //   {name: 'Personal Care', subcats: ['Clothes', 'Shoes', 'Barber/Salon', 'Cosmetics', 'Accessories', 'Laundry', 'Other']},
+  //   {name: 'Fragrances', subcats: ['Perfumes', 'Attars', 'Body Sprays', 'Room Sprays', 'Air Fresheners', 'Incense', 'Other']},
+    
+  //   // Household
+  //   {name: 'Household Essentials', subcats: ['Drinking Water', 'Batteries', 'Cleaning Supplies', 'Toiletries', 'Kitchen Items', 'Detergents', 'Tissues/Paper', 'Other']},
+  //   {name: 'Home Maintenance', subcats: ['Repairs', 'Plumbing', 'Electrical', 'Painting', 'Furniture', 'Appliances', 'Decorations', 'Other']},
+    
+  //   // Family & Pets
+  //   {name: 'Children', subcats: ['Clothing', 'Diapers', 'Baby Food', 'Toys', 'Skin Care', 'School Supplies', 'Activities', 'Other']},
+  //   {name: 'Cat Care', subcats: ['Cat Food', 'Litter', 'Vet Visits', 'Grooming', 'Toys', 'Medications', 'Accessories', 'Other']},
+  //   {name: 'Pocket Money', subcats: ['Mother', 'Wife', 'Children', 'Maid', 'Helper', 'Other']},
+    
+  //   // Health
+  //   {name: 'Health & Medical', subcats: ['Doctor Visits', 'Dental/Vision', 'Lab Tests', 'Pharmacy', 'Emergency', 'Vitamins/Supplements', 'Medical Equipment', 'Other']},
+    
+  //   // Transportation & Utilities
+  //   {name: 'Transportation', subcats: ['Fuel/Petrol', 'Car Maintenance', 'Car Wash', 'Toll Tax', 'Parking', 'Public Transport', 'Ride Sharing', 'Other']},
+  //   {name: 'Utilities & Bills', subcats: ['Electricity', 'Gas', 'Water Bill', 'Internet', 'Mobile Packages', 'TV/Cable', 'Landline', 'Other']},
+    
+  //   // Gifts & Charity
+  //   {name: 'Gifts & Charity', subcats: ['Birthday Gifts', 'Wedding Gifts', 'Festival Gifts', 'Charity/Donations', 'Zakat', 'Sadaqah', 'Other']},
+    
+  //   // Less Frequent
+  //   {name: 'Books & Learning', subcats: ['Books', 'Magazines', 'Courses', 'Online Learning', 'Stationery', 'Other']},
+  //   {name: 'Education', subcats: ['School Fees', 'Tuition', 'Uniforms', 'Transport', 'School Supplies', 'Other']},
+  //   {name: 'Technology', subcats: ['Electronics', 'Gadgets', 'Accessories', 'Repairs', 'Software', 'Apps', 'Cloud Storage', 'Other']},
+  //   {name: 'Subscriptions', subcats: ['Streaming Services', 'Online Services', 'Insurance Premium', 'Memberships', 'Other']},
+    
+  //   // Rare/Occasional
+  //   {name: 'Miscellaneous', subcats: ['Emergency Expenses', 'Unexpected', 'Lost/Damaged Items', 'Fines/Penalties', 'Miscellaneous', 'Other']}
   ];
   
   for (var i = 0; i < categories.length; i++) {

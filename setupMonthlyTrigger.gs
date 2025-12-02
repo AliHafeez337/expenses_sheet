@@ -86,8 +86,8 @@ function carryForwardShortfalls(newSheet, ss) {
   
   if (!previousSheet) {
     // No previous month, set shortfalls to 0
-    newSheet.getRange('B21').setValue(0); // Changed from B20
-    newSheet.getRange('B22').setValue(0); // Changed from B21
+    newSheet.getRange('B21').setValue(0);
+    newSheet.getRange('B22').setValue(0);
     return;
   }
   
@@ -153,8 +153,8 @@ function parseMonthSheet(sheetName) {
 function clearInputCells(sheet) {
   var lastRow = sheet.getLastRow();
   
-  // Clear all [Me], [Wife], and [Comment] rows
-  for (var row = 27; row <= lastRow; row++) {
+  // FIXED: Changed from row 27 to row 28 (first data row after grand total)
+  for (var row = 28; row <= lastRow; row++) {
     var note = sheet.getRange(row, 2).getNote();
     
     if (note === '[Me]' || note === '[Wife]' || note === '[Comment]') {

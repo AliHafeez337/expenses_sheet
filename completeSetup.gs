@@ -549,6 +549,23 @@ function applyFormatting() {
         sheet.getRange(row, baseCol + 3).setBackground(colorSet[2]);
       }
     }
+    
+    // Apply text formatting to comment rows
+    if (note === '[Comment]') {
+      for (var day = 1; day <= 31; day++) {
+        var baseCol = 4 + (day - 1) * 4;
+        
+        // Set background color for comment cells (light yellow)
+        sheet.getRange(row, baseCol + 1).setBackground('#FFFEF0');
+        sheet.getRange(row, baseCol + 2).setBackground('#FFFEF0');
+        sheet.getRange(row, baseCol + 3).setBackground('#FFFEF0');
+        
+        // Set number format to plain text - this forces text input
+        sheet.getRange(row, baseCol + 1).setNumberFormat('@STRING@');
+        sheet.getRange(row, baseCol + 2).setNumberFormat('@STRING@');
+        sheet.getRange(row, baseCol + 3).setNumberFormat('@STRING@');
+      }
+    }
   }
   
   // Protect category header rows - CHANGED FROM 26 TO 27

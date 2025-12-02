@@ -8,11 +8,11 @@ function completeSetup() {
   setupHeaders();
   SpreadsheetApp.flush();
   
-  // Step 2: Setup Control Panel (Rows 2-25)
+  // Step 2: Setup Control Panel (Rows 2-26) - NOW INCLUDES GRAND TOTAL ROW
   setupControlPanel();
   SpreadsheetApp.flush();
   
-  // Step 3: Setup Categories starting at Row 26
+  // Step 3: Setup Categories starting at Row 27 (CHANGED FROM 26)
   setupCategories();
   SpreadsheetApp.flush();
   
@@ -29,6 +29,9 @@ function completeSetup() {
   
   // Step 7: Update control panel summary formulas
   updateControlPanelSummaries();
+  
+  // Step 8: Apply grand total formulas
+  applyGrandTotalFormulas();
   
   SpreadsheetApp.getUi().alert('Complete setup finished successfully!');
 }
@@ -52,20 +55,10 @@ function updateControlPanelSummaries() {
     dayColumns.donation.push(getColumnLetter(baseCol + 3));
   }
   
-  // MY MONTHLY TOTAL (B5) - sum all [Me] rows
-  var myFormula = '=';
-  var myTerms = [];
-  dayColumns.personal.forEach(function(col) { myTerms.push('SUM(' + col + '27:' + col + lastRow + ')'); });
-  dayColumns.family.forEach(function(col) { myTerms.push('SUM(' + col + '27:' + col + lastRow + ')'); });
-  dayColumns.donation.forEach(function(col) { myTerms.push('SUM(' + col + '27:' + col + lastRow + ')'); });
-  
-  // Filter only [Me] rows - we'll sum every 4th row starting from row 27
-  // Actually, simpler: sum all C column values where row has [Me] note
-  // Even simpler: sum the monthly totals (column C) for [Me] rows
   var meRows = [];
   var wifeRows = [];
   
-  for (var row = 27; row <= lastRow; row++) {
+  for (var row = 28; row <= lastRow; row++) { // CHANGED FROM 27 TO 28
     var note = sheet.getRange(row, 2).getNote();
     if (note === '[Me]') {
       meRows.push('C' + row);
@@ -82,11 +75,11 @@ function updateControlPanelSummaries() {
     sheet.getRange('B6').setFormula('=' + wifeRows.join('+'));
   }
   
-  // MY TOTAL DONATION (B11) - sum donation column for [Me] rows
+  // MY TOTAL DONATION (B12) - sum donation column for [Me] rows
   var myDonationTerms = [];
   var wifeDonationTerms = [];
   
-  for (var row = 27; row <= lastRow; row++) {
+  for (var row = 28; row <= lastRow; row++) { // CHANGED FROM 27 TO 28
     var note = sheet.getRange(row, 2).getNote();
     if (note === '[Me]') {
       dayColumns.donation.forEach(function(col) {
@@ -105,6 +98,65 @@ function updateControlPanelSummaries() {
   
   if (wifeDonationTerms.length > 0) {
     sheet.getRange('B13').setFormula('=' + wifeDonationTerms.join('+'));
+  }
+}
+
+// NEW FUNCTION: Apply grand total formulas for row 26
+function applyGrandTotalFormulas() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var lastRow = sheet.getLastRow();
+  
+  // Find all category total rows
+  var categoryTotalRows = [];
+  for (var row = 27; row <= lastRow; row++) {
+    var note = sheet.getRange(row, 2).getNote();
+    if (note === '[CategoryTotal]') {
+      categoryTotalRows.push(row);
+    }
+  }
+  
+  if (categoryTotalRows.length === 0) {
+    return; // No category totals found
+  }
+  
+  // Monthly Grand Total (Column C) = Sum of all category totals
+  var monthlyTerms = [];
+  for (var i = 0; i < categoryTotalRows.length; i++) {
+    monthlyTerms.push('C' + categoryTotalRows[i]);
+  }
+  sheet.getRange('C26').setFormula('=' + monthlyTerms.join('+'));
+  
+  // For each day, sum all category totals
+  for (var day = 1; day <= 31; day++) {
+    var baseCol = 3 + (day - 1) * 4 + 1; // Day 1 starts at column D (4)
+    
+    // Day Total = Sum of all category day totals
+    var dayTotalTerms = [];
+    for (var i = 0; i < categoryTotalRows.length; i++) {
+      dayTotalTerms.push(getColumnLetter(baseCol) + categoryTotalRows[i]);
+    }
+    sheet.getRange(26, baseCol).setFormula('=' + dayTotalTerms.join('+'));
+    
+    // Personal Total = Sum of all category personal totals
+    var personalTerms = [];
+    for (var i = 0; i < categoryTotalRows.length; i++) {
+      personalTerms.push(getColumnLetter(baseCol + 1) + categoryTotalRows[i]);
+    }
+    sheet.getRange(26, baseCol + 1).setFormula('=' + personalTerms.join('+'));
+    
+    // Family Total = Sum of all category family totals
+    var familyTerms = [];
+    for (var i = 0; i < categoryTotalRows.length; i++) {
+      familyTerms.push(getColumnLetter(baseCol + 2) + categoryTotalRows[i]);
+    }
+    sheet.getRange(26, baseCol + 2).setFormula('=' + familyTerms.join('+'));
+    
+    // Donation Total = Sum of all category donation totals
+    var donationTerms = [];
+    for (var i = 0; i < categoryTotalRows.length; i++) {
+      donationTerms.push(getColumnLetter(baseCol + 3) + categoryTotalRows[i]);
+    }
+    sheet.getRange(26, baseCol + 3).setFormula('=' + donationTerms.join('+'));
   }
 }
 
@@ -186,10 +238,20 @@ function setupControlPanel() {
   sheet.getRange('A24').setValue('MY ADJUSTED TARGET:');
   sheet.getRange('A25').setValue('WIFE\'S ADJUSTED TARGET:');
   
-  // Format control panel
-  sheet.getRange('A2:B25')
+  // NEW: Grand Total Per Day (Row 26)
+  sheet.getRange('A26').setValue('GRAND TOTAL PER DAY:');
+  sheet.getRange('A26').setNote('[GrandTotal]');
+  
+  // Format control panel (now including row 26)
+  sheet.getRange('A2:B26')
     .setBackground('#f3f3f3')
     .setFontWeight('bold');
+  
+  // Highlight grand total row differently
+  sheet.getRange('A26:B26')
+    .setBackground('#d9ead3')
+    .setFontWeight('bold')
+    .setFontSize(11);
   
   // Mark input cells
   var inputCells = ['B2', 'B3', 'B9', 'B10', 'B21', 'B22'];
@@ -202,7 +264,7 @@ function setupControlPanel() {
 
 function setupCategories() {
   var sheet = SpreadsheetApp.getActiveSheet();
-  var startRow = 26;
+  var startRow = 27; // CHANGED FROM 26 TO 27
   var currentRow = startRow;
   
   var categories = [
@@ -268,15 +330,12 @@ function applyFormulas() {
   // Apply control panel formulas
   applyControlPanelFormulas();
   
-  // Apply data section formulas (starting row 26)
-  applyDataFormulas(26, lastRow);
+  // Apply data section formulas (starting row 27) - CHANGED FROM 26 TO 27
+  applyDataFormulas(27, lastRow);
 }
 
 function applyControlPanelFormulas() {
   var sheet = SpreadsheetApp.getActiveSheet();
-  
-  // Simple approach: We'll update these formulas after all data is set up
-  // For now, just set basic formulas that won't cause timeout
   
   // COMBINED MONTHLY TOTAL (B7)
   sheet.getRange('B7').setFormula('=B5+B6');
@@ -300,7 +359,6 @@ function applyControlPanelFormulas() {
   sheet.getRange('B25').setFormula('=MAX(0,B10+(B22/B3)*100)');
   
   // Set placeholder values for B5, B6, B12, B13
-  // These will be updated by the helper function after data setup
   sheet.getRange('B5').setValue(0);
   sheet.getRange('B6').setValue(0);
   sheet.getRange('B12').setValue(0);
@@ -310,19 +368,16 @@ function applyControlPanelFormulas() {
 function applyDataFormulas(startRow, lastRow) {
   var sheet = SpreadsheetApp.getActiveSheet();
   
-  // Process in batches to avoid timeout
-  SpreadsheetApp.flush(); // Commit any pending changes
+  SpreadsheetApp.flush();
   
   var batchSize = 20;
   for (var batchStart = startRow; batchStart <= lastRow; batchStart += batchSize) {
     var batchEnd = Math.min(batchStart + batchSize - 1, lastRow);
     
-    // Process each row in this batch
     for (var row = batchStart; row <= batchEnd; row++) {
       var subcatVal = sheet.getRange(row, 2).getValue();
       var note = sheet.getRange(row, 2).getNote();
       
-      // Only process subcategory rows (those with notes)
       if (note === '[Totals]' && subcatVal !== '') {
         applyTotalsRowFormulas(row, sheet);
       } else if (note === '[Me]') {
@@ -334,18 +389,15 @@ function applyDataFormulas(startRow, lastRow) {
       }
     }
     
-    // Flush after each batch
     SpreadsheetApp.flush();
   }
 }
 
 function applyCategoryTotalsRowFormulas(row, sheet) {
-  // Find all [Totals] rows above this row until we hit a category header
   var totalsRows = [];
   
-  for (var r = row - 1; r >= 26; r--) {
+  for (var r = row - 1; r >= 27; r--) { // CHANGED FROM 26 TO 27
     var cellVal = sheet.getRange(r, 1).getValue();
-    // If we hit a category header row, stop
     if (cellVal !== '') {
       break;
     }
@@ -356,7 +408,6 @@ function applyCategoryTotalsRowFormulas(row, sheet) {
     }
   }
   
-  // Monthly Total (Column C) = Sum of all subcategory totals
   if (totalsRows.length > 0) {
     var monthlyFormula = '=';
     var monthlyTerms = [];
@@ -366,33 +417,28 @@ function applyCategoryTotalsRowFormulas(row, sheet) {
     sheet.getRange(row, 3).setFormula(monthlyFormula + monthlyTerms.join('+'));
   }
   
-  // For each day
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1; // Column D for Day 1
+    var baseCol = 3 + (day - 1) * 4 + 1;
     
     if (totalsRows.length > 0) {
-      // Day Total = Sum of all subcategory day totals
       var dayTotalTerms = [];
       for (var i = 0; i < totalsRows.length; i++) {
         dayTotalTerms.push(getColumnLetter(baseCol) + totalsRows[i]);
       }
       sheet.getRange(row, baseCol).setFormula('=' + dayTotalTerms.join('+'));
       
-      // Personal Total = Sum of all subcategory personal totals
       var personalTerms = [];
       for (var i = 0; i < totalsRows.length; i++) {
         personalTerms.push(getColumnLetter(baseCol + 1) + totalsRows[i]);
       }
       sheet.getRange(row, baseCol + 1).setFormula('=' + personalTerms.join('+'));
       
-      // Family Total = Sum of all subcategory family totals
       var familyTerms = [];
       for (var i = 0; i < totalsRows.length; i++) {
         familyTerms.push(getColumnLetter(baseCol + 2) + totalsRows[i]);
       }
       sheet.getRange(row, baseCol + 2).setFormula('=' + familyTerms.join('+'));
       
-      // Donation Total = Sum of all subcategory donation totals
       var donationTerms = [];
       for (var i = 0; i < totalsRows.length; i++) {
         donationTerms.push(getColumnLetter(baseCol + 3) + totalsRows[i]);
@@ -403,40 +449,34 @@ function applyCategoryTotalsRowFormulas(row, sheet) {
 }
 
 function applyTotalsRowFormulas(row, sheet) {
-  // Monthly Total (Column C) = Sum of Me + Wife for all days
   var monthlyTerms = [];
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1; // Day 1 starts at D (column 4)
-    monthlyTerms.push(getColumnLetter(baseCol) + row); // Day Total
+    var baseCol = 3 + (day - 1) * 4 + 1;
+    monthlyTerms.push(getColumnLetter(baseCol) + row);
   }
   sheet.getRange(row, 3).setFormula('=' + monthlyTerms.join('+'));
   
-  // For each day
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1; // Column D for Day 1
+    var baseCol = 3 + (day - 1) * 4 + 1;
     var meRow = row + 1;
     var wifeRow = row + 2;
     
-    // Day Total (baseCol) = Personal + Family + Donation
     var dayTotalFormula = '=' + 
       getColumnLetter(baseCol + 1) + row + '+' + 
       getColumnLetter(baseCol + 2) + row + '+' + 
       getColumnLetter(baseCol + 3) + row;
     sheet.getRange(row, baseCol).setFormula(dayTotalFormula);
     
-    // Personal Total = Me Personal + Wife Personal
     var personalFormula = '=' + 
       getColumnLetter(baseCol + 1) + meRow + '+' + 
       getColumnLetter(baseCol + 1) + wifeRow;
     sheet.getRange(row, baseCol + 1).setFormula(personalFormula);
     
-    // Family Total = Me Family + Wife Family
     var familyFormula = '=' + 
       getColumnLetter(baseCol + 2) + meRow + '+' + 
       getColumnLetter(baseCol + 2) + wifeRow;
     sheet.getRange(row, baseCol + 2).setFormula(familyFormula);
     
-    // Donation Total = Me Donation + Wife Donation
     var donationFormula = '=' + 
       getColumnLetter(baseCol + 3) + meRow + '+' + 
       getColumnLetter(baseCol + 3) + wifeRow;
@@ -445,19 +485,16 @@ function applyTotalsRowFormulas(row, sheet) {
 }
 
 function applyMeRowFormulas(row, sheet) {
-  // Monthly Total (Column C) = Sum of all my spending for all days
   var monthlyTerms = [];
   for (var day = 1; day <= 31; day++) {
     var baseCol = 3 + (day - 1) * 4 + 1;
-    monthlyTerms.push(getColumnLetter(baseCol) + row); // My Day Total
+    monthlyTerms.push(getColumnLetter(baseCol) + row);
   }
   sheet.getRange(row, 3).setFormula('=' + monthlyTerms.join('+'));
   
-  // For each day
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1; // Column D for Day 1
+    var baseCol = 3 + (day - 1) * 4 + 1;
     
-    // My Day Total = My Personal + My Family + My Donation
     var myDayTotalFormula = '=' + 
       getColumnLetter(baseCol + 1) + row + '+' + 
       getColumnLetter(baseCol + 2) + row + '+' + 
@@ -467,19 +504,16 @@ function applyMeRowFormulas(row, sheet) {
 }
 
 function applyWifeRowFormulas(row, sheet) {
-  // Monthly Total (Column C) = Sum of all wife's spending for all days
   var monthlyTerms = [];
   for (var day = 1; day <= 31; day++) {
     var baseCol = 3 + (day - 1) * 4 + 1;
-    monthlyTerms.push(getColumnLetter(baseCol) + row); // Wife's Day Total
+    monthlyTerms.push(getColumnLetter(baseCol) + row);
   }
   sheet.getRange(row, 3).setFormula('=' + monthlyTerms.join('+'));
   
-  // For each day
   for (var day = 1; day <= 31; day++) {
-    var baseCol = 3 + (day - 1) * 4 + 1; // Column D for Day 1
+    var baseCol = 3 + (day - 1) * 4 + 1;
     
-    // Wife's Day Total = Wife's Personal + Wife's Family + Wife's Donation
     var wifeDayTotalFormula = '=' + 
       getColumnLetter(baseCol + 1) + row + '+' + 
       getColumnLetter(baseCol + 2) + row + '+' + 
@@ -493,54 +527,57 @@ function applyFormatting() {
   var lastRow = sheet.getLastRow();
   var lastCol = sheet.getLastColumn();
   
-  // Simple color scheme - apply to ALL rows dynamically
   var dayColors = [
-    ['#E6E6FF', '#D6D6FF', '#C6C6FF'], // Day 1: Purple theme
-    ['#E6F3FF', '#D6E3FF', '#C6D3FF'], // Day 2: Blue theme  
-    ['#E6FFE6', '#D6FFD6', '#C6FFC6'], // Day 3: Green theme
-    ['#FFF0E6', '#FFE0D6', '#FFD0C6'], // Day 4: Orange theme
-    ['#F0E6FF', '#E0D6FF', '#D0C6FF']  // Day 5: Light purple
+    ['#E6E6FF', '#D6D6FF', '#C6C6FF'],
+    ['#E6F3FF', '#D6E3FF', '#C6D3FF'],
+    ['#E6FFE6', '#D6FFD6', '#C6FFC6'],
+    ['#FFF0E6', '#FFE0D6', '#FFD0C6'],
+    ['#F0E6FF', '#E0D6FF', '#D0C6FF']
   ];
   
-  // Apply colors only to input cells ([Me] and [Wife] rows)
-  for (var row = 26; row <= lastRow; row++) {
+  // Apply colors to input cells ([Me] and [Wife] rows) - CHANGED FROM 26 TO 27
+  for (var row = 27; row <= lastRow; row++) {
     var note = sheet.getRange(row, 2).getNote();
     
-    // Only color [Me] and [Wife] rows
     if (note === '[Me]' || note === '[Wife]') {
       for (var day = 1; day <= 31; day++) {
         var colorSet = dayColors[(day - 1) % dayColors.length];
-        var baseCol = 4 + (day - 1) * 4; // Day 1 starts at column 4 (D), each day takes 4 columns
+        var baseCol = 4 + (day - 1) * 4;
         
-        // Personal, Family, Donation input columns
-        sheet.getRange(row, baseCol + 1).setBackground(colorSet[0]);   // Personal (Column E for Day 1)
-        sheet.getRange(row, baseCol + 2).setBackground(colorSet[1]);   // Family (Column F for Day 1)
-        sheet.getRange(row, baseCol + 3).setBackground(colorSet[2]);   // Donation (Column G for Day 1)
+        sheet.getRange(row, baseCol + 1).setBackground(colorSet[0]);
+        sheet.getRange(row, baseCol + 2).setBackground(colorSet[1]);
+        sheet.getRange(row, baseCol + 3).setBackground(colorSet[2]);
       }
     }
   }
   
-  // Protect category header rows from accidental input
-  for (var row = 26; row <= lastRow; row++) {
+  // Protect category header rows - CHANGED FROM 26 TO 27
+  for (var row = 27; row <= lastRow; row++) {
     var categoryVal = sheet.getRange(row, 1).getValue();
     if (categoryVal !== '') {
-      // This is a category header - protect columns C, D, E and all day columns
       sheet.getRange(row, 3, 1, lastCol - 2).setBackground('#d9d9d9');
-      // Lock the cells by clearing content area (making them non-editable visually)
     }
   }
   
-  // Format totals as currency
-  sheet.getRange(27, 3, lastRow - 26, 1).setNumberFormat('"PKR "#,##0.00');
+  // Format grand total row (row 26) with light green and make it stand out
+  sheet.getRange(26, 3, 1, lastCol - 2)
+    .setBackground('#d9ead3')
+    .setFontWeight('bold');
+  
+  // Format totals as currency - CHANGED FROM 27 TO 28
+  sheet.getRange(28, 3, lastRow - 27, 1).setNumberFormat('"PKR "#,##0.00');
+  
+  // Number formatting for grand total row
+  sheet.getRange(26, 3, 1, lastCol - 2).setNumberFormat('"PKR "#,##0.00');
   
   // Number formatting for all day columns
   for (var day = 1; day <= 31; day++) {
     var baseCol = 4 + (day - 1) * 4;
-    sheet.getRange(26, baseCol, lastRow - 25, 4).setNumberFormat('"PKR "#,##0.00');
+    sheet.getRange(27, baseCol, lastRow - 26, 4).setNumberFormat('"PKR "#,##0.00');
   }
   
   // Number formatting for control panel
-  sheet.getRange('B2:B25').setNumberFormat('"PKR "#,##0.00');
+  sheet.getRange('B2:B26').setNumberFormat('"PKR "#,##0.00');
   sheet.getRange('B15:B16').setNumberFormat('0.00"%"');
 }
 

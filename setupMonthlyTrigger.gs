@@ -53,7 +53,7 @@ function createMonthlySheet() {
   
   // Get current month and year
   var now = new Date();
-  var monthName = Utilities.formatDate(now, Session.getScriptTimeZone(), 'MMMM yyyy');
+  var monthName = Utilities.formatDate(now, Session.getScriptTimeZone(), 'MMMM');
   
   // Check if sheet already exists
   if (ss.getSheetByName(monthName)) {
@@ -86,18 +86,18 @@ function carryForwardShortfalls(newSheet, ss) {
   
   if (!previousSheet) {
     // No previous month, set shortfalls to 0
-    newSheet.getRange('B20').setValue(0);
-    newSheet.getRange('B21').setValue(0);
+    newSheet.getRange('B21').setValue(0); // Changed from B20
+    newSheet.getRange('B22').setValue(0); // Changed from B21
     return;
   }
   
-  // Get remaining needs from previous month (B17 and B18)
-  var myRemainingNeed = previousSheet.getRange('B17').getValue() || 0;
-  var wifeRemainingNeed = previousSheet.getRange('B18').getValue() || 0;
+  // Get remaining needs from previous month (B18 and B19)
+  var myRemainingNeed = previousSheet.getRange('B18').getValue() || 0;
+  var wifeRemainingNeed = previousSheet.getRange('B19').getValue() || 0;
   
   // Set as shortfalls in new sheet (only if positive)
-  newSheet.getRange('B20').setValue(Math.max(0, myRemainingNeed));
-  newSheet.getRange('B21').setValue(Math.max(0, wifeRemainingNeed));
+  newSheet.getRange('B21').setValue(Math.max(0, myRemainingNeed)); // My Previous Shortfall
+  newSheet.getRange('B22').setValue(Math.max(0, wifeRemainingNeed)); // Wife's Previous Shortfall
 }
 
 function getPreviousMonthSheet(ss) {

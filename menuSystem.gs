@@ -7,6 +7,7 @@ function onOpen() {
   ui.createMenu('📊 Expense Tracker')
     .addItem('🔧 Complete Setup', 'completeSetup')
     .addItem('➕ Add New Category', 'addNewCategory')
+    .addItem('📝 Add Subcategories to Existing', 'addSubcategoriesToExisting')
     .addSeparator()
     .addSubMenu(ui.createMenu('🔒 Cell Protection')
       .addItem('⚠️ Warning Mode (Recommended)', 'applyWarningProtection')
@@ -76,9 +77,14 @@ function showHelp() {
     '   • Totals rows\n' +
     '   • Monthly total columns\n\n' +
     '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+    '➕ ADDING CATEGORIES:\n' +
+    '   • Add New Category: Creates a complete new category\n' +
+    '   • Add Subcategories: Adds more items to existing category\n' +
+    '   • Tip: Use subcategories feature to avoid timeouts\n\n' +
     '💡 TIP: Protection is automatically applied when you:\n' +
     '   • Run Complete Setup\n' +
-    '   • Add a new category\n\n' +
+    '   • Add a new category\n' +
+    '   • Add subcategories\n\n' +
     'You can change protection mode anytime from the menu.';
   
   ui.alert('Help', helpText, ui.ButtonSet.OK);

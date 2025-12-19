@@ -20,7 +20,7 @@ Health & Medical: Doctor Visits, Dental/Vision, Lab Tests, Pharmacy, Emergency, 
 
 // Transportation & Utilities
 Transportation: Fuel/Petrol, Car Maintenance, Car Wash, Toll Tax, Parking, Public Transport, Ride Sharing, Other
-Utilities & Bills: Electricity, Gas, Water Bill, Internet, Mobile Packages, TV/Cable, Landline, Other
+Utilities & Bills: Electricity Father, Electricity Mother, Gas, Water, Mobile Packages, TV/Cable, Landline/Internet, Other
 
 // Gifts & Charity
 Gifts & Charity: Birthday Gifts, Wedding Gifts, Festival Gifts, Charity/Donations, Zakat, Sadaqah, Other

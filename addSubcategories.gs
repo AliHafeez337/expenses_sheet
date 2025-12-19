@@ -157,12 +157,27 @@ function addSubcategoriesToExisting() {
   // Step 13: Update control panel summaries
   updateControlPanelSummaries();
   
-  // Step 14: Update grand total formulas
-  applyGrandTotalFormulas();
+  // Step 14: Update grand total formulas (with error handling)
+  var grandTotalError = false;
+  try {
+    applyGrandTotalFormulas();
+  } catch (error) {
+    grandTotalError = true;
+    Logger.log('Warning: Grand total formulas update failed: ' + error.toString());
+    // Continue anyway - subcategories were added successfully
+  }
   
   SpreadsheetApp.flush();
   
-  ui.alert('Success!', subcategories.length + ' subcategories have been added to "' + categoryName + '" successfully!', ui.ButtonSet.OK);
+  if (grandTotalError) {
+    ui.alert('Partial Success', 
+      subcategories.length + ' subcategories have been added to "' + categoryName + '" successfully!\n\n' +
+      'However, the grand total formulas (row 26) could not be updated automatically.\n' +
+      'You may need to manually update them or run the script again.', 
+      ui.ButtonSet.OK);
+  } else {
+    ui.alert('Success!', subcategories.length + ' subcategories have been added to "' + categoryName + '" successfully!', ui.ButtonSet.OK);
+  }
 }
 
 // Helper function to convert column number to letter
@@ -455,38 +470,85 @@ function applyGrandTotalFormulas() {
     return;
   }
   
-  var monthlyTerms = [];
-  for (var i = 0; i < categoryTotalRows.length; i++) {
-    monthlyTerms.push('B' + categoryTotalRows[i]);
-  }
-  sheet.getRange('B26').setFormula('=' + monthlyTerms.join('+'));
-  
-  for (var day = 1; day <= 31; day++) {
-    var baseCol = 2 + (day - 1) * 4 + 1;
-    
-    var dayTotalTerms = [];
+  try {
+    // Monthly Grand Total (Column B)
+    var monthlyTerms = [];
     for (var i = 0; i < categoryTotalRows.length; i++) {
-      dayTotalTerms.push(getColumnLetter(baseCol) + categoryTotalRows[i]);
+      monthlyTerms.push('B' + categoryTotalRows[i]);
     }
-    sheet.getRange(26, baseCol).setFormula('=' + dayTotalTerms.join('+'));
+    var monthlyFormula = '=' + monthlyTerms.join('+');
     
-    var personalTerms = [];
-    for (var i = 0; i < categoryTotalRows.length; i++) {
-      personalTerms.push(getColumnLetter(baseCol + 1) + categoryTotalRows[i]);
+    // Check if formula is too long (Google Sheets limit is ~50,000 chars)
+    if (monthlyFormula.length > 40000) {
+      // For very long formulas, split into chunks and use nested SUM
+      var chunkSize = 100; // Process 100 categories at a time
+      var chunks = [];
+      for (var i = 0; i < monthlyTerms.length; i += chunkSize) {
+        var chunk = monthlyTerms.slice(i, Math.min(i + chunkSize, monthlyTerms.length));
+        chunks.push('(' + chunk.join('+') + ')');
+      }
+      monthlyFormula = '=' + chunks.join('+');
     }
-    sheet.getRange(26, baseCol + 1).setFormula('=' + personalTerms.join('+'));
+    sheet.getRange('B26').setFormula(monthlyFormula);
+    SpreadsheetApp.flush();
     
-    var familyTerms = [];
-    for (var i = 0; i < categoryTotalRows.length; i++) {
-      familyTerms.push(getColumnLetter(baseCol + 2) + categoryTotalRows[i]);
+    // For each day, sum all category totals
+    for (var day = 1; day <= 31; day++) {
+      var baseCol = 2 + (day - 1) * 4 + 1;
+      
+      // Build formulas with individual cell references
+      var dayTotalTerms = [];
+      var personalTerms = [];
+      var familyTerms = [];
+      var donationTerms = [];
+      
+      for (var i = 0; i < categoryTotalRows.length; i++) {
+        dayTotalTerms.push(getColumnLetter(baseCol) + categoryTotalRows[i]);
+        personalTerms.push(getColumnLetter(baseCol + 1) + categoryTotalRows[i]);
+        familyTerms.push(getColumnLetter(baseCol + 2) + categoryTotalRows[i]);
+        donationTerms.push(getColumnLetter(baseCol + 3) + categoryTotalRows[i]);
+      }
+      
+      // Build formulas and check length
+      var dayFormula = '=' + dayTotalTerms.join('+');
+      var personalFormula = '=' + personalTerms.join('+');
+      var familyFormula = '=' + familyTerms.join('+');
+      var donationFormula = '=' + donationTerms.join('+');
+      
+      // If formula is too long, split into chunks
+      function buildChunkedFormula(terms) {
+        if (terms.length === 0) return '=0';
+        if (terms.length <= 100) {
+          return '=' + terms.join('+');
+        }
+        // Split into chunks of 100
+        var chunks = [];
+        for (var i = 0; i < terms.length; i += 100) {
+          var chunk = terms.slice(i, Math.min(i + 100, terms.length));
+          chunks.push('(' + chunk.join('+') + ')');
+        }
+        return '=' + chunks.join('+');
+      }
+      
+      sheet.getRange(26, baseCol).setFormula(buildChunkedFormula(dayTotalTerms));
+      sheet.getRange(26, baseCol + 1).setFormula(buildChunkedFormula(personalTerms));
+      sheet.getRange(26, baseCol + 2).setFormula(buildChunkedFormula(familyTerms));
+      sheet.getRange(26, baseCol + 3).setFormula(buildChunkedFormula(donationTerms));
+      
+      // Add a small delay every 5 days to avoid rate limiting
+      if (day % 5 === 0) {
+        SpreadsheetApp.flush();
+        Utilities.sleep(50);
+      }
     }
-    sheet.getRange(26, baseCol + 2).setFormula('=' + familyTerms.join('+'));
     
-    var donationTerms = [];
-    for (var i = 0; i < categoryTotalRows.length; i++) {
-      donationTerms.push(getColumnLetter(baseCol + 3) + categoryTotalRows[i]);
-    }
-    sheet.getRange(26, baseCol + 3).setFormula('=' + donationTerms.join('+'));
+    SpreadsheetApp.flush();
+  } catch (error) {
+    // Log the error for debugging
+    Logger.log('Error in applyGrandTotalFormulas: ' + error.toString());
+    Logger.log('Category total rows: ' + categoryTotalRows.join(','));
+    // Re-throw to let caller know it failed
+    throw new Error('Failed to update grand total formulas: ' + error.toString());
   }
 }
 

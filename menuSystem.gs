@@ -9,6 +9,12 @@ function onOpen() {
     .addItem('➕ Add New Category', 'addNewCategory')
     .addItem('📝 Add Subcategories to Existing', 'addSubcategoriesToExisting')
     .addSeparator()
+    .addSubMenu(ui.createMenu('🔍 Diagnostics & Repair')
+      .addItem('🔎 Diagnose Category Formulas', 'diagnoseCategoryFormulas')
+      .addItem('🔧 Fix Category Formulas', 'fixCategoryFormulasByName')
+      .addSeparator()
+      .addItem('📊 Diagnose Global Formulas', 'diagnoseGlobalFormulas'))
+    .addSeparator()
     .addSubMenu(ui.createMenu('🔒 Cell Protection')
       .addItem('⚠️ Warning Mode (Recommended)', 'applyWarningProtection')
       .addItem('🔐 Strict Mode (Full Lock)', 'applyStrictProtection')
@@ -81,6 +87,11 @@ function showHelp() {
     '   • Add New Category: Creates a complete new category\n' +
     '   • Add Subcategories: Adds more items to existing category\n' +
     '   • Tip: Use subcategories feature to avoid timeouts\n\n' +
+    '🔍 DIAGNOSTICS & REPAIR:\n' +
+    '   • Diagnose Category Formulas: Check formulas in a specific category\n' +
+    '   • Fix Category Formulas: Automatically repair category formula errors\n' +
+    '   • Diagnose Global Formulas: Check control panel & grand total formulas\n' +
+    '   • Use these if formulas seem incorrect after adding categories\n\n' +
     '💡 TIP: Protection is automatically applied when you:\n' +
     '   • Run Complete Setup\n' +
     '   • Add a new category\n' +

@@ -100,6 +100,70 @@ function diagnoseCategoryFormulas() {
 }
 
 /**
+ * Diagnostic Script for Global Formulas (Control Panel & Grand Total)
+ * 
+ * This script checks formulas that depend on ALL categories:
+ * - Control Panel summaries (B5, B6, B12, B13)
+ * - Grand Total Row (Row 26)
+ */
+function diagnoseGlobalFormulas() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var ui = SpreadsheetApp.getUi();
+  
+  // Collect all issues
+  var issues = [];
+  
+  // Check control panel formulas
+  checkControlPanelFormulas(sheet, issues);
+  
+  // Check grand total formulas
+  checkGrandTotalFormulas(sheet, issues);
+  
+  // Report results
+  if (issues.length === 0) {
+    ui.alert('Diagnosis Complete', 
+      '✓ All global formulas are correct!\n\n' +
+      'Checked:\n' +
+      '• Control Panel summaries (B5, B6, B12, B13)\n' +
+      '• Grand Total Row (Row 26)',
+      ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Build detailed report
+  var report = 'GLOBAL FORMULAS DIAGNOSTIC REPORT\n';
+  report += '====================================\n\n';
+  report += 'Issues found: ' + issues.length + '\n\n';
+  report += 'DETAILED ISSUES:\n';
+  report += '================\n\n';
+  
+  for (var i = 0; i < issues.length; i++) {
+    var issue = issues[i];
+    report += (i + 1) + '. ' + issue.type + ': ' + issue.location + '\n';
+    report += '   Row: ' + issue.row + ', Column: ' + getColumnLetter(issue.col) + issue.col + '\n';
+    report += '   Expected: ' + issue.expected + '\n';
+    report += '   Actual: ' + issue.actual + '\n\n';
+  }
+  
+  // Show in alert (truncated if too long)
+  if (report.length > 1000) {
+    report = report.substring(0, 1000) + '\n\n... (showing first 1000 chars, see logs for full report)';
+  }
+  
+  Logger.log('=== GLOBAL FORMULAS DIAGNOSTIC REPORT ===\n' + report);
+  
+  var response = ui.alert('Issues Found', 
+    'Found ' + issues.length + ' formula error(s) in global formulas.\n\n' +
+    'Check the execution log (View > Logs) for detailed information.\n\n' +
+    'Would you like to fix these errors automatically?',
+    ui.ButtonSet.YES_NO);
+  
+  if (response === ui.Button.YES) {
+    fixGlobalFormulas(issues, ui);
+  }
+}
+
+/**
  * Check formulas in a [Totals] row
  */
 function checkTotalsRowFormulas(totalsRow, meRow, wifeRow, sheet, issues, subcatName) {
@@ -378,6 +442,219 @@ function buildMonthlyTotalFormula(row) {
 }
 
 /**
+ * Check control panel summary formulas (B5, B6, B12, B13)
+ */
+function checkControlPanelFormulas(sheet, issues) {
+  var lastRow = sheet.getLastRow();
+  
+  // Build expected formulas
+  var meRows = [];
+  var wifeRows = [];
+  var myDonationTerms = [];
+  var wifeDonationTerms = [];
+  
+  for (var row = 28; row <= lastRow; row++) {
+    var note = sheet.getRange(row, 1).getNote();
+    
+    if (note === '[Me]') {
+      meRows.push('B' + row);
+      
+      for (var day = 1; day <= 31; day++) {
+        var baseCol = 3 + (day - 1) * 4;
+        myDonationTerms.push(getColumnLetter(baseCol + 3) + row);
+      }
+    } else if (note === '[Wife]') {
+      wifeRows.push('B' + row);
+      
+      for (var day = 1; day <= 31; day++) {
+        var baseCol = 3 + (day - 1) * 4;
+        wifeDonationTerms.push(getColumnLetter(baseCol + 3) + row);
+      }
+    }
+  }
+  
+  // Check B5: My Monthly Total
+  if (meRows.length > 0) {
+    var expectedB5 = '=' + meRows.join('+');
+    var actualB5 = sheet.getRange('B5').getFormula();
+    if (!formulasAreEquivalent(actualB5, expectedB5)) {
+      issues.push({
+        type: 'ERROR',
+        location: 'Control Panel - My Monthly Total (B5)',
+        expected: expectedB5,
+        actual: actualB5 || '(empty)',
+        row: 5,
+        col: 2
+      });
+    }
+  }
+  
+  // Check B6: Wife's Monthly Total
+  if (wifeRows.length > 0) {
+    var expectedB6 = '=' + wifeRows.join('+');
+    var actualB6 = sheet.getRange('B6').getFormula();
+    if (!formulasAreEquivalent(actualB6, expectedB6)) {
+      issues.push({
+        type: 'ERROR',
+        location: 'Control Panel - Wife\'s Monthly Total (B6)',
+        expected: expectedB6,
+        actual: actualB6 || '(empty)',
+        row: 6,
+        col: 2
+      });
+    }
+  }
+  
+  // Check B12: My Total Donation
+  if (myDonationTerms.length > 0) {
+    var expectedB12 = '=' + myDonationTerms.join('+');
+    var actualB12 = sheet.getRange('B12').getFormula();
+    if (!formulasAreEquivalent(actualB12, expectedB12)) {
+      issues.push({
+        type: 'ERROR',
+        location: 'Control Panel - My Total Donation (B12)',
+        expected: expectedB12,
+        actual: actualB12 || '(empty)',
+        row: 12,
+        col: 2
+      });
+    }
+  }
+  
+  // Check B13: Wife's Total Donation
+  if (wifeDonationTerms.length > 0) {
+    var expectedB13 = '=' + wifeDonationTerms.join('+');
+    var actualB13 = sheet.getRange('B13').getFormula();
+    if (!formulasAreEquivalent(actualB13, expectedB13)) {
+      issues.push({
+        type: 'ERROR',
+        location: 'Control Panel - Wife\'s Total Donation (B13)',
+        expected: expectedB13,
+        actual: actualB13 || '(empty)',
+        row: 13,
+        col: 2
+      });
+    }
+  }
+}
+
+/**
+ * Check grand total row formulas (row 26)
+ */
+function checkGrandTotalFormulas(sheet, issues) {
+  var lastRow = sheet.getLastRow();
+  
+  // Find all category total rows
+  var categoryTotalRows = [];
+  for (var row = 27; row <= lastRow; row++) {
+    var note = sheet.getRange(row, 1).getNote();
+    if (note === '[CategoryTotal]') {
+      categoryTotalRows.push(row);
+    }
+  }
+  
+  if (categoryTotalRows.length === 0) {
+    return; // No categories found
+  }
+  
+  // Check B26: Monthly Grand Total
+  var expectedMonthlyTerms = [];
+  for (var i = 0; i < categoryTotalRows.length; i++) {
+    expectedMonthlyTerms.push('B' + categoryTotalRows[i]);
+  }
+  var expectedB26 = '=' + expectedMonthlyTerms.join('+');
+  var actualB26 = sheet.getRange('B26').getFormula();
+  
+  if (!formulasAreEquivalent(actualB26, expectedB26)) {
+    issues.push({
+      type: 'ERROR',
+      location: 'Grand Total Row - Monthly Total (B26)',
+      expected: expectedB26,
+      actual: actualB26 || '(empty)',
+      row: 26,
+      col: 2
+    });
+  }
+  
+  // Check each day's grand total formulas
+  for (var day = 1; day <= 31; day++) {
+    var baseCol = 2 + (day - 1) * 4 + 1;
+    
+    // Day Total
+    var expectedDayTotalTerms = [];
+    for (var i = 0; i < categoryTotalRows.length; i++) {
+      expectedDayTotalTerms.push(getColumnLetter(baseCol) + categoryTotalRows[i]);
+    }
+    var expectedDayTotal = '=' + expectedDayTotalTerms.join('+');
+    var actualDayTotal = sheet.getRange(26, baseCol).getFormula();
+    if (!formulasAreEquivalent(actualDayTotal, expectedDayTotal)) {
+      issues.push({
+        type: 'ERROR',
+        location: 'Grand Total Row - Day ' + day + ' Total',
+        expected: expectedDayTotal,
+        actual: actualDayTotal || '(empty)',
+        row: 26,
+        col: baseCol
+      });
+    }
+    
+    // Personal Total
+    var expectedPersonalTerms = [];
+    for (var i = 0; i < categoryTotalRows.length; i++) {
+      expectedPersonalTerms.push(getColumnLetter(baseCol + 1) + categoryTotalRows[i]);
+    }
+    var expectedPersonal = '=' + expectedPersonalTerms.join('+');
+    var actualPersonal = sheet.getRange(26, baseCol + 1).getFormula();
+    if (!formulasAreEquivalent(actualPersonal, expectedPersonal)) {
+      issues.push({
+        type: 'ERROR',
+        location: 'Grand Total Row - Day ' + day + ' Personal',
+        expected: expectedPersonal,
+        actual: actualPersonal || '(empty)',
+        row: 26,
+        col: baseCol + 1
+      });
+    }
+    
+    // Family Total
+    var expectedFamilyTerms = [];
+    for (var i = 0; i < categoryTotalRows.length; i++) {
+      expectedFamilyTerms.push(getColumnLetter(baseCol + 2) + categoryTotalRows[i]);
+    }
+    var expectedFamily = '=' + expectedFamilyTerms.join('+');
+    var actualFamily = sheet.getRange(26, baseCol + 2).getFormula();
+    if (!formulasAreEquivalent(actualFamily, expectedFamily)) {
+      issues.push({
+        type: 'ERROR',
+        location: 'Grand Total Row - Day ' + day + ' Family',
+        expected: expectedFamily,
+        actual: actualFamily || '(empty)',
+        row: 26,
+        col: baseCol + 2
+      });
+    }
+    
+    // Donation Total
+    var expectedDonationTerms = [];
+    for (var i = 0; i < categoryTotalRows.length; i++) {
+      expectedDonationTerms.push(getColumnLetter(baseCol + 3) + categoryTotalRows[i]);
+    }
+    var expectedDonation = '=' + expectedDonationTerms.join('+');
+    var actualDonation = sheet.getRange(26, baseCol + 3).getFormula();
+    if (!formulasAreEquivalent(actualDonation, expectedDonation)) {
+      issues.push({
+        type: 'ERROR',
+        location: 'Grand Total Row - Day ' + day + ' Donation',
+        expected: expectedDonation,
+        actual: actualDonation || '(empty)',
+        row: 26,
+        col: baseCol + 3
+      });
+    }
+  }
+}
+
+/**
  * Report diagnostic results
  */
 function reportResults(issues, categoryName, subcategoryCount, ui) {
@@ -419,6 +696,53 @@ function reportResults(issues, categoryName, subcategoryCount, ui) {
   
   if (response === ui.Button.YES) {
     fixCategoryFormulas(issues, categoryName, ui);
+  }
+}
+
+/**
+ * Fix all identified global formula issues
+ */
+function fixGlobalFormulas(issues, ui) {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var fixedCount = 0;
+  var errorCount = 0;
+  
+  try {
+    for (var i = 0; i < issues.length; i++) {
+      var issue = issues[i];
+      try {
+        sheet.getRange(issue.row, issue.col).setFormula(issue.expected);
+        fixedCount++;
+        
+        // Add small delay every 50 fixes to avoid rate limiting
+        if (fixedCount % 50 === 0) {
+          SpreadsheetApp.flush();
+          Utilities.sleep(100);
+        }
+      } catch (error) {
+        errorCount++;
+        Logger.log('Error fixing ' + issue.location + ': ' + error.toString());
+      }
+    }
+    
+    SpreadsheetApp.flush();
+    
+    if (errorCount === 0) {
+      ui.alert('Repair Complete', 
+        'Successfully fixed ' + fixedCount + ' global formula error(s).',
+        ui.ButtonSet.OK);
+    } else {
+      ui.alert('Repair Partially Complete', 
+        'Fixed ' + fixedCount + ' formula error(s).\n' +
+        errorCount + ' error(s) could not be fixed automatically.\n\n' +
+        'Check the execution log for details.',
+        ui.ButtonSet.OK);
+    }
+  } catch (error) {
+    ui.alert('Repair Error', 
+      'An error occurred while fixing formulas: ' + error.toString() + '\n\n' +
+      'Fixed ' + fixedCount + ' formulas before the error.',
+      ui.ButtonSet.OK);
   }
 }
 

@@ -1,436 +1,317 @@
-# Expenses<year> Google Sheet
+# Expenses<year> Google Sheet - Complete Documentation
 
 ## Overview
 This Google Sheet is designed for comprehensive expense tracking with advanced categorization and monthly reporting capabilities. The sheet automatically creates new monthly sheets from a template and provides detailed insights into personal, family, and donation expenses.
 
-## UPDATED LAYOUT STRUCTURE
+## CRITICAL STRUCTURE CLARIFICATION
 
-### New Row Organization:
-- **Row 1**: Days Header (frozen)
-- **Rows 2-25**: Control Panel with income, totals, and graphs
-- **Rows 26+**: Data Input Section with categories and daily expenses
+### Each Subcategory Takes 4 ROWS:
+For every subcategory (e.g., "Diapers"), there are **4 consecutive rows**:
+1. **[Totals] Row**: Contains subcategory name in Column A + all calculated totals
+2. **[Me] Row**: Input cells for my spending (note `[Me]` in Column A)
+3. **[Wife] Row**: Input cells for wife's spending (note `[Wife]` in Column A)
+4. **[Comment] Row**: Text input for comments (note `[Comment]` in Column A)
 
-## DUMMY TABLE VISUALIZATION (For Your Reference Only)
-| Category     | Subcategory | Subcat Total   | Day 1 total    | Day 1 - Personal | Day 1 - Family | Day 1 - Donation | Day 2 total    | Day 2 - Personal | Day 2 - Family   | Day 2 - Donation |
-|--------------|-------------|----------------|----------------|------------------|----------------|------------------|----------------|------------------|------------------|------------------|
-|--------------|-------------|----------------|----------------|------------------|----------------|------------------|----------------|------------------|------------------|------------------|
-| Children     |             |$197+$120+...=..|$95+$111+..=$304| $35+$21+...=$88  | $35+$31+...=$12| $25+$41+...=$62  | Day 1 total    | $30+$51+...=$15  | $34+$61+...=$98  | $38+$71+...=$83  |
-|--------------| Diapers     | 110 + 87 = $197| $45 + $50 = $95| $15 + $20 = $35  | $25 + $10 = $35| $10 + $15 = $25  | $42+$60 = $102 | $18 + $12 = $30  | $20 + $14 = $34  | $22 + $16 = $38  |
-|              |             | $87(all days)  | $20+$10+$15=$45| [Me: $20]        | [Me: $10]      | [Me: $15]        | $12+$14+$16=$42| [Me: $12]        | [Me: $14]        | [Me: $16]        |
-|              |             | $110(all days) | $15+$25+$10=$50| [Wife: $15]      | [Wife: $25]    | [Wife: $10]      | $18+$20+$22=$60| [Wife: $18]      | [Wife: $20]      | [Wife: $22]      |
-|              |             |                |                | "Size 3"         | "Bulk"         | "Shelter"        | Day 1 total    | ""               | ""               | "comment"        |
-|              | Toys        | $120           | $111           | $21              | $31            | $41              | Day 1 total    | $51              | $61              | $71              |
+### Each Day Has 4 COLUMNS:
+Starting from Column C (Day 1), each day has 4 columns:
+- **Column 1**: Day Total (formula)
+- **Column 2**: Personal (formula for totals row, input for Me/Wife rows)
+- **Column 3**: Family (formula for totals row, input for Me/Wife rows)
+- **Column 4**: Donation (formula for totals row, input for Me/Wife rows)
 
-## CALCULATION EXPLANATION (From Your Example):
-1) [Me: $20] / [Wife: $15] : Individual entries per subcategory per day per tier
-2) $15 + $20 = $35 : total per subcategory per day per tier (total of me and my wife spent for ourself on day1 on diapers)
-3) $25 + $10 = $35 : total of me and my wife spent on family on day1 on diapers
-4) $18 + $12 = $30 : total of me and my wife donated diapers on day1
-5) $20+$10+$15=$45 : total of I spent on diapers on day 1
-6) $15+$25+$10=$50 : total of my wife spent on diapers on day 1
-7) $45 + $50 = $95 : total of me and my wife spend on diapers on day 1 (on ourselfs, on family and on donation)
-8) $21 : the total of me and my wife spent on ourselfs on day1 on toys (same as point 2 but for toys subcategory)
-9) $31 : total of me and my wife spent on family toys on day1
-10) $41 : total of me and my wife donated toys on day 1
-11) $35+$21+...=$88 : total of me and my wife spent on all categories for ourselfs on day 1 (adding point 2 and point 8 and so on... for all subcategories)
-12) $35+$31+...=$12 : total of me and my wife spent on all categories for family on day 1 (adding 3 and 9 and so on)
-13) $25+$41+...=$62 : total of me and my wife donated all categories on day 1 (adding 4 and 10 and so on)
-14) $111 : total of me and my spent on toys on day 1 (just like point 7 but for toys)
-15) $95+$111+..=$304 : total of me and my wife spending on all subcategories (of Children category) on day 1
-16) $88 + $12 + $62 = $162 : the total me and my wife spent on day 1 on all the subcategories of Children category
-17) $87(all days) : total of me spending on diapers in a whole month
-18) $110(all days) : total of my wife spending on diapers in a whole month
-19) 110 + 87 = $197 : total of me and my wife both spending on diapers in a whole month
-20) $120 : total of me and my wife spending on toys in a whole month
-21) $197+$120+...=.. : total of me and my wife spending on all subcategories of Children in a whole month
+### Column Structure:
+- **Column A**: Category/Subcategory name (and notes: `[Totals]`, `[Me]`, `[Wife]`, `[Comment]`, `[CategoryTotal]`)
+- **Column B**: Monthly Total (formulas)
+- **Columns C-DV**: 31 days × 4 columns = 124 columns
+  - Day 1: Columns C, D, E, F (Total, Personal, Family, Donation)
+  - Day 2: Columns G, H, I, J (Total, Personal, Family, Donation)
+  - ... continues for all 31 days ...
+  - Day 31: Columns 123-126 (Total, Personal, Family, Donation)
+- **Total columns**: 2 + 124 = **126 columns**
 
-## IMPORTANT NOTE
-Cell references (A1, B5, etc.) are conceptual only. Actual positions may shift due to graphs, new rows, or layout changes. All formulas use relative referencing and named ranges.
+### Row Structure:
+- **Row 1**: Column Headers (frozen)
+- **Rows 2-26**: Control Panel with income, totals, and graphs
+  - Row 26: Grand Total Per Day (sums all category totals)
+- **Row 27+**: Data Input Section with categories and subcategories
 
-## FILE STRUCTURE
+## VISUAL EXAMPLE: Diapers Subcategory for Day 1
 
-### NEW ROW STRUCTURE:
-- **Row 1**: Days Header (frozen)
-- **Rows 2-25**: CONTROL PANEL SECTION (income, totals, graphs)
-- **Rows 26+**: DATA INPUT SECTION (categories & subcategories)
+```
+Row Type    | Column A | Column B | Column C | Column D | Column E | Column F |
+------------|----------|----------|----------|----------|----------|----------|
+            | Category | Monthly  | Day1 Tot | Day1 Pers| Day1 Fam | Day1 Don |
+[Totals]    | Diapers  | $197     | $95      | $35      | $35      | $25      |
+[Me]        | [Me]     | $87      | $45      | $15      | $25      | $10      |
+[Wife]      | [Wife]   | $110     | $50      | $20      | $10      | $15      |
+[Comment]   | [Comment]|          |          | "Size 3" | "Bulk"   | "Shelter"|
+```
 
-### Column Structure (31 Days):
-A: Category
-B: Subcategory  
-C: Subcategory Monthly Total (Me + Wife)
-F: Day 1 Total (subcategory)
-G: Day 1 - Personal Total
-H: Day 1 - Family Total
-I: Day 1 - Donation Total
-J: Day 1 - Personal [Me]
-K: Day 1 - Personal [Wife]
-L: Day 1 - Personal [Comment]
-M: Day 1 - Family [Me]
-N: Day 1 - Family [Wife]
-O: Day 1 - Family [Comment]
-P: Day 1 - Donation [Me]
-Q: Day 1 - Donation [Wife]
-R: Day 1 - Donation [Comment]
-S: Day 2 Total (subcategory)
-... (repeats pattern G-R for each subsequent day, up to Day 31)
+### Calculation Flow (Using Above Example):
 
-## UPDATED CONTROL PANEL SECTION (Rows 2-25)
+**For [Me] Row:**
+- Input: $15 (Personal), $25 (Family), $10 (Donation)
+- Formula: Day1 Total (C) = $15 + $25 + $10 = $45
+- Formula: Monthly Total (B) = Sum of all 31 day totals = $87
+
+**For [Wife] Row:**
+- Input: $20 (Personal), $10 (Family), $15 (Donation)
+- Formula: Day1 Total (C) = $20 + $10 + $15 = $50
+- Formula: Monthly Total (B) = Sum of all 31 day totals = $110
+
+**For [Totals] Row:**
+- Formula: Day1 Personal (D) = Me Personal + Wife Personal = $15 + $20 = $35
+- Formula: Day1 Family (E) = Me Family + Wife Family = $25 + $10 = $35
+- Formula: Day1 Donation (F) = Me Donation + Wife Donation = $10 + $15 = $25
+- Formula: Day1 Total (C) = $35 + $35 + $25 = $95
+- Formula: Monthly Total (B) = Me Monthly + Wife Monthly = $87 + $110 = $197
+
+**For [Comment] Row:**
+- Input: Text only (e.g., "Size 3", "Bulk", "Shelter")
+
+## CONTROL PANEL SECTION (Rows 2-26)
 
 ### Income & Individual Totals:
-[My Income]: [Input cell]
-[Wife's Income]: [Input cell]
-[My Monthly Total]: =SUM(J26+J33+J40+..., M26+M33+M40+..., P26+P33+P40+...) [sums all my spending across entire sheet]
-[Wife's Monthly Total]: =SUM(K26+K33+K40+..., N26+N33+N40+..., Q26+Q33+Q40+...) [sums all wife's spending across entire sheet]
+- **My Income** (B2): Input cell
+- **Wife's Income** (B3): Input cell
+- **My Monthly Total** (B5): =SUM(all [Me] rows' Column B across entire sheet)
+- **Wife's Monthly Total** (B6): =SUM(all [Wife] rows' Column B across entire sheet)
+- **Combined Monthly Total** (B7): =B5+B6
 
 ### Donation Targets & Progress:
-[My Target %]: [Input cell - default 10%]
-[Wife's Target %]: [Input cell - default 10%]
-[My Total Donation]: =SUM(P26+P33+P40+...) [sums all my donation cells across all categories]
-[Wife's Total Donation]: =SUM(Q26+Q33+Q40+...) [sums all wife's donation cells across all categories]
-[My Donation %]: =([My Total Donation] / [My Income]) × 100
-[Wife's Donation %]: =([Wife's Total Donation] / [Wife's Income]) × 100
-[My Remaining Need]: =([My Target %] × [My Income]) - [My Total Donation]
-[Wife's Remaining Need]: =([Wife's Target %] × [Wife's Income]) - [Wife's Total Donation]
+- **My Target %** (B9): Input cell (default 10%)
+- **Wife's Target %** (B10): Input cell (default 10%)
+- **My Total Donation** (B12): =SUM(all [Me] rows' donation columns across all days)
+- **Wife's Total Donation** (B13): =SUM(all [Wife] rows' donation columns across all days)
+- **My Donation %** (B15): =IF(B2>0,(B12/B2)*100,0)
+- **Wife's Donation %** (B16): =IF(B3>0,(B13/B3)*100,0)
+- **My Remaining Need** (B18): =(B9*B2/100)-B12
+- **Wife's Remaining Need** (B19): =(B10*B3/100)-B13
 
 ### Donation Carry-Over:
-[My Previous Month Shortfall]: [Auto-filled from previous month]
-[Wife's Previous Month Shortfall]: [Auto-filled from previous month]
-[My Adjusted Target]: =MAX(0, [Current Target] + [Previous Shortfall])
-[Wife's Adjusted Target]: =MAX(0, [Current Target] + [Previous Shortfall])
+- **My Previous Month Shortfall** (B21): Input/Auto-filled from previous month
+- **Wife's Previous Month Shortfall** (B22): Input/Auto-filled from previous month
+- **My Adjusted Target** (B24): =MAX(0,B9+(B21/B2)*100)
+- **Wife's Adjusted Target** (B25): =MAX(0,B10+(B22/B3)*100)
 
-### Progress Visualization Area
-- Donation Progress Bars (My & Wife separately)
-- Monthly Spending Pie Chart by Category
-- Donation Target Achievement Trend Line
-- Category-wise Breakdown Chart
-- Monthly Comparison Graphs
+### Grand Total Per Day (Row 26):
+- **Monthly Grand Total** (B26): =SUM(all category totals' Column B)
+- **Day X Total**: =SUM(all category totals' Day X Total column)
+- **Day X Personal**: =SUM(all category totals' Day X Personal column)
+- **Day X Family**: =SUM(all category totals' Day X Family column)
+- **Day X Donation**: =SUM(all category totals' Day X Donation column)
 
-## DATA SECTION CALCULATIONS (Starting Row 26)
+## DATA SECTION FORMULA PATTERNS (Row 27+)
 
-### Individual Monthly Totals (in CONTROL PANEL):
-[My Monthly Total]: =SUM(all my spending cells across all categories and all days)
-[Wife's Monthly Total]: =SUM(all wife's spending cells across all categories and all days)
+### Category Structure:
+Each category consists of:
+1. **Category Header Row**: Category name in Column A (no note)
+2. **Subcategories**: 4 rows each ([Totals], [Me], [Wife], [Comment])
+3. **Category Total Row**: "CategoryName TOTAL" in Column A with note `[CategoryTotal]`
 
-### Subcategory Row Formulas:
-[Subcat Monthly Total]: = [My Monthly Total] + [Wife's Monthly Total]
-[My Monthly Total]: =SUM(J26+J33+J40+...) [sums all 'Me' cells across all days of month]
-[Wife's Monthly Total]: =SUM(K26+K33+K40+...) [sums all 'Wife' cells across all days of month]
-[Day X Total]: = [Personal Total] + [Family Total] + [Donation Total]
-[Personal Total]: = [Me Personal] + [Wife Personal]
-[Family Total]: = [Me Family] + [Wife Family]
-[Donation Total]: = [Me Donation] + [Wife Donation]
+### [Totals] Row Formulas:
+```javascript
+Monthly Total (B) = Sum of all Day Totals for this subcategory (31 days)
+Day X Total (baseCol) = Day X Personal + Day X Family + Day X Donation
+Day X Personal (baseCol+1) = [Me] Personal + [Wife] Personal
+Day X Family (baseCol+2) = [Me] Family + [Wife] Family
+Day X Donation (baseCol+3) = [Me] Donation + [Wife] Donation
 
-### Individual Daily Calculations (per subcategory):
-[My Day Total]: = [Me Personal] + [Me Family] + [Me Donation]
-[Wife's Day Total]: = [Wife Personal] + [Wife Family] + [Wife Donation]
+Where baseCol = 3 + (day - 1) * 4
+```
 
-### Category Total Row:
-[Category Total]: =SUM(all subcategory C column totals under this category)
-[Category Day X Total]: =SUM(all subcategory Day X totals under this category)
-[Category Personal Total]: =SUM(all subcategory Personal totals under this category)
-[Category Family Total]: =SUM(all subcategory Family totals under this category)
-[Category Donation Total]: =SUM(all subcategory Donation totals under this category)
+### [Me] Row Formulas:
+```javascript
+Monthly Total (B) = Sum of all My Day Totals (31 days)
+Day X Total (baseCol) = My Personal + My Family + My Donation
+// Personal, Family, Donation (baseCol+1, baseCol+2, baseCol+3) = INPUT CELLS
+```
+
+### [Wife] Row Formulas:
+```javascript
+Monthly Total (B) = Sum of all Wife's Day Totals (31 days)
+Day X Total (baseCol) = Wife's Personal + Wife's Family + Wife's Donation
+// Personal, Family, Donation (baseCol+1, baseCol+2, baseCol+3) = INPUT CELLS
+```
+
+### [Comment] Row:
+```javascript
+// All cells except Category/Subcategory = TEXT INPUT CELLS (no formulas)
+// Format: Text only, triggers text keyboard on mobile devices
+```
+
+### Category Total Row Formulas:
+```javascript
+Monthly Total (B) = Sum of all [Totals] rows' Column B in this category
+Day X Total (baseCol) = Sum of all [Totals] rows' Day X Total in this category
+Day X Personal (baseCol+1) = Sum of all [Totals] rows' Day X Personal in this category
+Day X Family (baseCol+2) = Sum of all [Totals] rows' Day X Family in this category
+Day X Donation (baseCol+3) = Sum of all [Totals] rows' Day X Donation in this category
+```
 
 ## PRE-DEFINED CATEGORY STRUCTURE
 
-### Personal Expenses:
-- Groceries
-- Restaurants
-- Bring food item
-- Clothes
-- Fruits
-- Other Food
-- Personal care (barber etc)
-- AK personal food
-- AG food
-- Picnic
-- Other
+Based on `categoryNames.txt`:
 
-### Children:
-- Clothing
-- Skin Care
-- Diaper
-- Other
+### Most Frequent Daily Expenses:
+- **Food & Groceries**: Groceries, Fruits, Vegetables, Meat/Chicken, Dairy, Bakery, Dry Fruits, Snacks, Other
+- **Dining & Orders**: Restaurants, Fast Food, Online Orders, Bring Home, Cafe/Tea, Picnic Food, Other
 
-### Gifts:
-- Gifts
-- Donations (charity)
-- Other
+### Personal & Routine:
+- **Personal Care**: Clothes, Shoes, Barber/Salon, Cosmetics, Accessories, Laundry, Other
+- **Fragrances**: Perfumes, Attars, Body Sprays, Room Sprays, Air Fresheners, Incense, Other
 
-### Health/medical:
-- Doctors/dental/vision
-- Test
-- Pharmacy
-- Emergency
-- Other
+### Household:
+- **Household Essentials**: Drinking Water, Batteries, Cleaning Supplies, Toiletries, Kitchen Items, Detergents, Tissues/Paper, Other
+- **Home Maintenance**: Repairs, Plumbing, Electrical, Painting, Furniture, Appliances, Decorations, Other
 
-### Home:
-- Wife
-- Iron helper
-- Other
+### Family & Pets:
+- **Children**: Clothing, Diapers, Baby Food, Toys, Skin Care, School Supplies, Activities, Other
+- **Cat Care**: Cat Food, Litter, Vet Visits, Grooming, Toys, Medications, Accessories, Other
+- **Pocket Money**: Mother, Wife, Children, Maid, Helper, Other
 
-### Transportation:
-- Fuel
-- Car maintenance
-- Toll tax
-- Public transport
-- Other
+### Health:
+- **Health & Medical**: Doctor Visits, Dental/Vision, Lab Tests, Pharmacy, Emergency, Vitamins/Supplements, Medical Equipment, Other
 
-### Utilities:
-- Mobile Packages
-- Other
+### Transportation & Utilities:
+- **Transportation**: Fuel/Petrol, Car Maintenance, Car Wash, Toll Tax, Parking, Public Transport, Ride Sharing, Other
+- **Utilities & Bills**: Electricity Father, Electricity Mother, Gas, Water, Mobile Packages, TV/Cable, Landline/Internet, Other
 
-### Family Expenses:
-- Groceries
-- Restaurants
-- Bring food item
-- Clothes
-- AG food
-- Picnic
-- Fruits
-- Other
+### Gifts & Charity:
+- **Gifts & Charity**: Birthday Gifts, Wedding Gifts, Festival Gifts, Charity/Donations, Zakat, Sadaqah, Other
+
+### Less Frequent:
+- **Books & Learning**: Books, Magazines, Courses, Online Learning, Stationery, Other
+- **Education**: School Fees, Tuition, Uniforms, Transport, School Supplies, Other
+- **Technology**: Electronics, Gadgets, Accessories, Repairs, Software, Apps, Cloud Storage, Other
+- **Subscriptions**: Streaming Services, Online Services, Insurance Premium, Memberships, Other
+
+### Rare/Occasional:
+- **Miscellaneous**: Emergency Expenses, Unexpected, Lost/Damaged Items, Fines/Penalties, Miscellaneous, Other
 
 ## TECHNICAL FEATURES
 
-## UPDATED FREEZE CONFIGURATION:
-- Freeze Rows: 1-2 (Days header and control panel start)
-- Freeze Columns: A-B (Category, Subcategory)
+### Freeze Configuration:
+- **Freeze Rows**: 1-2 (Header and control panel start)
+- **Freeze Columns**: A-B (Category/Subcategory, Monthly Total)
 
-### Input/Output Cell Management:
-- Input Cells: White background with colored borders (editable)
-- Output Cells: Light gray background, protected from editing
-- Daily Columns: Alternating light colors for visual separation
-- Category Rows: Different background colors for visual separation
+### Cell Types:
+- **Input Cells**: White background (#ffffff) - editable by user
+  - Income cells (B2, B3)
+  - Target % cells (B9, B10)
+  - Previous Shortfall cells (B21, B22)
+  - [Me] and [Wife] rows: Personal, Family, Donation columns
+- **Formula Cells**: Light gray background (#f8f8f8) - protected
+  - All totals and calculated values
+  - [Totals] rows
+  - Category total rows
+  - Control panel formulas
+- **Comment Cells**: Light yellow background (#fffef0) - text input only
+  - [Comment] rows: Personal, Family, Donation columns
+- **Category Headers**: Dark gray background (#d9d9d9) - entire row
+- **Category Totals**: Medium gray background (#b8b8b8) - entire row
+- **Grand Total Row**: Light green background (#d9ead3) - row 26
 
 ### Data Validation:
-- All amount cells: Decimal numbers only (up to 2 decimal places)
-- PKR currency format - pure numerical values with "PKR" display
+- Amount cells: Decimal numbers (up to 2 decimal places)
+- Currency format: "PKR #,##0.00"
 - Comment fields: Text input only (max 100 characters)
-- Percentage fields: 0-100% range validation
+- Percentage fields: 0-100% range
+- Comment cells: Data validation to force text input (triggers text keyboard on mobile)
 
-### Protection Settings:
-- All formula cells protected from accidental editing
-- Input cells clearly marked and color-coded
-- Template structure locked
-- Only data entry cells are editable
+### Color Coding by Day:
+Input cells for [Me] and [Wife] rows use alternating color sets:
+- Day 1, 6, 11, 16, 21, 26, 31: #E6E6FF, #D6D6FF, #C6C6FF
+- Day 2, 7, 12, 17, 22, 27: #E6F3FF, #D6E3FF, #C6D3FF
+- Day 3, 8, 13, 18, 23, 28: #E6FFE6, #D6FFD6, #C6FFC6
+- Day 4, 9, 14, 19, 24, 29: #FFF0E6, #FFE0D6, #FFD0C6
+- Day 5, 10, 15, 20, 25, 30: #F0E6FF, #E0D6FF, #D0C6FF
 
-### Color Coding Scheme:
-- Personal Expenses: Light Blue (#E6F3FF)
-- Family Expenses: Light Green (#E6FFE6)
-- Children: Light Pink (#FFE6E6)
-- Health/Medical: Light Orange (#FFE6CC)
-- Gifts: Light Purple (#F0E6FF)
-- Home: Light Yellow (#FFFFE6)
-- Transportation: Light Cyan (#E6FFFF)
-- Utilities: Light Gray (#F0F0F0)
-- Input Cell Borders: Blue for Personal, Green for Family, Yellow for Donation
-- Output Cells: Light Gray (#F8F8F8)
+### Column Widths:
+- Column A (Category/Subcategory): 180px
+- Column B (Monthly Total): 120px
+- Day columns (C-DV): 85px each
 
 ## MOBILE-FRIENDLY FEATURES:
-✅ Days header always visible (frozen row 1)
-✅ Category names always visible (frozen columns A-B)  
+✅ Column headers always visible (frozen row 1)
+✅ Category/Subcategory names always visible (frozen columns A-B)
 ✅ Quick summary always visible (frozen rows 1-2)
-✅ Easy scrolling to graphs
-✅ Mobile-optimized column widths
+✅ Easy horizontal scrolling through days
+✅ Optimized column widths (85px for day columns)
+✅ Text validation on comment cells triggers text keyboard on mobile
 
 ## AUTOMATION FEATURES
 
-### Monthly Sheet Creation Script:
-```javascript
-function createMonthlySheet() {
-  // Triggers: 1st day of each month at 6:00 AM
-  // 1. Get current month name
-  // 2. Duplicate template sheet
-  // 3. Rename to current month
-  // 4. Carry forward donation shortfalls from previous month
-  // 5. Reset daily columns but preserve monthly formulas
-  // 6. Update all date references
-  // 7. Apply color formatting
-  // 8. Set protection on formula cells
-}
+### Available Scripts:
+1. **completeSetup**: Initial setup of the entire sheet
+2. **addNewCategory**: Add a new category with subcategories
+3. **addSubcategoriesToExisting**: Add subcategories to an existing category
+4. **diagnoseCategoryFormulas**: Check formulas in a specific category
+5. **diagnoseGlobalFormulas**: Check control panel and grand total formulas
+6. **fixCategoryFormulasByName**: Fix formulas in a specific category
+7. **protectFormulaCells**: Apply protection to formula cells (warning or strict mode)
+8. **setupMonthlyTrigger**: Set up automatic monthly sheet creation
 
-// Donation Carry-Over Logic:
-function calculateDonationCarryOver() {
-  // At month-end: Calculate [Remaining Need] for both persons
-  const myRemainingNeed = (myTargetPercent * myIncome) - myTotalDonation;
-  const wifeRemainingNeed = (wifeTargetPercent * wifeIncome) - wifeTotalDonation;
-  
-  // If [Remaining Need] > 0, carry to next month as [Previous Shortfall]
-  const myPreviousShortfall = myRemainingNeed > 0 ? myRemainingNeed : 0;
-  const wifePreviousShortfall = wifeRemainingNeed > 0 ? wifeRemainingNeed : 0;
-  
-  // If [Remaining Need] <= 0 (target met or exceeded), set [Previous Shortfall] to 0
-  // This is handled in the ternary above
-  
-  // [Adjusted Target] = [Current Target %] + ([Previous Shortfall] / [Income]) × 100
-  const myAdjustedTarget = myTargetPercent + (myPreviousShortfall / myIncome) * 100;
-  const wifeAdjustedTarget = wifeTargetPercent + (wifePreviousShortfall / wifeIncome) * 100;
-  
-  return {
-    myPreviousShortfall,
-    wifePreviousShortfall,
-    myAdjustedTarget,
-    wifeAdjustedTarget
-  };
-}
+### Monthly Sheet Creation:
+- Triggers: 1st day of each month at 6:00 AM
+- Duplicates template sheet
+- Carries forward donation shortfalls
+- Resets all input cells ([Me], [Wife], [Comment] rows)
+- Preserves all formulas ([Totals] rows, category totals)
+- Updates month name and references
+- Applies all formatting and protection
 
-// Progress Tracking Automation:
-function updateProgressTracking() {
-  // Real-time donation percentage calculation
-  const myDonationPercent = (myTotalDonation / myIncome) * 100;
-  const wifeDonationPercent = (wifeTotalDonation / wifeIncome) * 100;
-  
-  // Automatic color coding based on progress status
-  function getProgressStatus(donationPercent, monthElapsedPercent) {
-    if (donationPercent >= 100) {
-      return 'Completed'; // Blue
-    } else if (monthElapsedPercent > 90 && donationPercent < 50) {
-      return 'Critical'; // Red
-    } else if (monthElapsedPercent > 75 && donationPercent < 75) {
-      return 'Behind Target'; // Yellow
-    } else {
-      return 'On Track'; // Green
-    }
-  }
-  
-  const myStatus = getProgressStatus(myDonationPercent, monthElapsedPercent);
-  const wifeStatus = getProgressStatus(wifeDonationPercent, monthElapsedPercent);
-  
-  // Monthly summary generation
-  generateMonthlySummary();
-  
-  // Shortfall accumulation tracking
-  trackShortfallAccumulation();
-}
+### Real-time Progress Tracking:
+- Automatic donation percentage calculation
+- Color-coded progress status (Completed/On Track/Behind/Critical)
+- Monthly summary generation
+- Shortfall accumulation tracking across months
 
-// Monthly Sheet Creation Script:
-function createMonthlySheet() {
-  // Triggers: 1st day of each month at 6:00 AM
-  const triggerTime = new Date();
-  triggerTime.setDate(1);
-  triggerTime.setHours(6, 0, 0, 0);
-  
-  // 1. Get current month name
-  const currentMonth = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MMMM yyyy');
-  
-  // 2. Duplicate template sheet
-  const templateSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Template');
-  const newSheet = templateSheet.copyTo(SpreadsheetApp.getActiveSpreadsheet());
-  
-  // 3. Rename to current month
-  newSheet.setName(currentMonth);
-  
-  // 4. Carry forward donation shortfalls from previous month
-  carryForwardShortfalls(newSheet);
-  
-  // 5. Reset daily columns but preserve monthly formulas
-  resetDailyColumns(newSheet);
-  
-  // 6. Update all date references
-  updateDateReferences(newSheet, currentMonth);
-  
-  // 7. Apply color formatting
-  applyColorFormatting(newSheet);
-  
-  // 8. Set protection on formula cells
-  setFormulaProtection(newSheet);
-}
+## IMPORTANT NOTES
 
-// Helper Functions:
-function carryForwardShortfalls(sheet) {
-  const lastMonthData = getLastMonthData();
-  sheet.getRange('B20').setValue(lastMonthData.myPreviousShortfall); // My Previous Month Shortfall
-  sheet.getRange('B21').setValue(lastMonthData.wifePreviousShortfall); // Wife's Previous Month Shortfall
-}
+1. **Each subcategory = 4 rows**: Don't insert rows within a subcategory group
+2. **4 columns per day**: Total, Personal, Family, Donation
+3. **Input cells are ONLY in [Me], [Wife], and [Comment] rows**
+4. **All other cells contain formulas** - do not edit manually
+5. **Category rows span entire width** for easy visual separation
+6. **Notes in Column A**: Used to identify row types (`[Totals]`, `[Me]`, `[Wife]`, `[Comment]`, `[CategoryTotal]`)
+7. **Column B**: Monthly totals for all rows
+8. **Day columns start at Column C**: baseCol = 3 + (day - 1) * 4
+9. **Data starts at Row 27**: Control panel is rows 2-26
+10. **Grand Total Row**: Row 26 sums all category totals
 
-function resetDailyColumns(sheet) {
-  const lastRow = sheet.getLastRow();
-  // Clear input cells for all days (columns J-R, and repeating pattern)
-  for (let day = 1; day <= 31; day++) {
-    const dayStartCol = 6 + (day - 1) * 13; // F column for Day 1, then +13 for each subsequent day
-    const inputRanges = [
-      {col: dayStartCol + 4, label: 'P[Me]'},      // J column for Day 1
-      {col: dayStartCol + 5, label: 'P[Wife]'},    // K column for Day 1
-      {col: dayStartCol + 7, label: 'F[Me]'},      // M column for Day 1
-      {col: dayStartCol + 8, label: 'F[Wife]'},    // N column for Day 1
-      {col: dayStartCol + 10, label: 'D[Me]'},     // P column for Day 1
-      {col: dayStartCol + 11, label: 'D[Wife]'}    // Q column for Day 1
-    ];
-    
-    inputRanges.forEach(range => {
-      sheet.getRange(26, range.col, lastRow - 25, 1).clearContent();
-    });
-    
-    // Clear comment columns
-    const commentRanges = [
-      {col: dayStartCol + 6, label: 'P[Comment]'},  // L column for Day 1
-      {col: dayStartCol + 9, label: 'F[Comment]'},  // O column for Day 1
-      {col: dayStartCol + 12, label: 'D[Comment]'}  // R column for Day 1
-    ];
-    
-    commentRanges.forEach(range => {
-      sheet.getRange(26, range.col, lastRow - 25, 1).clearContent();
-    });
-  }
-}
+## KNOWN LIMITATIONS & FUTURE IMPROVEMENTS
 
-function updateDateReferences(sheet, currentMonth) {
-  // Update any date references in the control panel
-  sheet.getRange('A1').setValue(`Expenses - ${currentMonth}`);
-}
+### Current Issue:
+- Control panel formulas (B5, B6, B12, B13) and grand total formulas (Row 26) can become very long with many categories
+- This can cause "Service Spreadsheets failed" errors when formulas exceed ~50,000 characters
 
-function applyColorFormatting(sheet) {
-  // Reapply color formatting to ensure consistency
-  const categoryColors = {
-    'Personal Expenses': '#E6F3FF',
-    'Family Expenses': '#E6FFE6',
-    'Children': '#FFE6E6',
-    'Health/medical': '#FFE6CC',
-    'Gifts': '#F0E6FF',
-    'Home': '#FFFFE6',
-    'Transportation': '#E6FFFF',
-    'Utilities': '#F0F0F0'
-  };
-  
-  const lastRow = sheet.getLastRow();
-  for (let row = 26; row <= lastRow; row++) {
-    const category = sheet.getRange(row, 1).getValue();
-    if (categoryColors[category]) {
-      sheet.getRange(row, 1, 1, sheet.getLastColumn()).setBackground(categoryColors[category]);
-    }
-  }
-}
+### Planned Solution:
+- Add a **Category Summary Row** after each category total row
+- This row will contain 8 cells:
+  - Column A: "My total for this category" (label)
+  - Column B: Sum of all [Me] rows' Column B in this category
+  - Column C: "Wife's total for this category" (label)
+  - Column D: Sum of all [Wife] rows' Column B in this category
+  - Column E: "My donations for this category" (label)
+  - Column F: Sum of all [Me] rows' donation columns in this category
+  - Column G: "Wife's donations for this category" (label)
+  - Column H: Sum of all [Wife] rows' donation columns in this category
+- Then B5, B6, B12, B13, and Row 26 will sum these summary rows instead of all individual rows
+- This will keep formulas short and manageable
 
-function setFormulaProtection(sheet) {
-  const protection = sheet.protect();
-  protection.setWarningOnly(true);
-  protection.setDescription('Protected cells contain formulas - only input cells are editable');
-}
+## DIAGNOSTIC TOOLS
 
-function generateMonthlySummary() {
-  // Generate monthly summary report
-  const summary = {
-    totalSpending: myMonthlyTotal + wifeMonthlyTotal,
-    totalDonation: myTotalDonation + wifeTotalDonation,
-    donationRate: ((myTotalDonation + wifeTotalDonation) / (myIncome + wifeIncome)) * 100,
-    categoryBreakdown: getCategoryBreakdown(),
-    monthlyTrend: getMonthlyTrend()
-  };
-  
-  return summary;
-}
+### Category Formula Diagnostics:
+- Checks all formulas within a specific category
+- Verifies [Totals], [Me], [Wife] row formulas
+- Verifies category total row formulas
+- Offers automatic repair
 
-function trackShortfallAccumulation() {
-  // Track shortfall accumulation over multiple months
-  const shortfallHistory = JSON.parse(PropertiesService.getDocumentProperties().getProperty('shortfallHistory') || '[]');
-  
-  shortfallHistory.push({
-    timestamp: new Date(),
-    myShortfall: myPreviousShortfall,
-    wifeShortfall: wifePreviousShortfall,
-    myAdjustedTarget: myAdjustedTarget,
-    wifeAdjustedTarget: wifeAdjustedTarget
-  });
-  
-  PropertiesService.getDocumentProperties().setProperty('shortfallHistory', JSON.stringify(shortfallHistory));
-}# expenses_sheet
+### Global Formula Diagnostics:
+- Checks control panel summaries (B5, B6, B12, B13)
+- Checks grand total row (Row 26)
+- Verifies formulas include all categories
+- Offers automatic repair
+
+Both diagnostic tools use normalized formula comparison (ignores term order) to avoid false positives.

@@ -251,6 +251,7 @@ Input cells for [Me] and [Wife] rows use alternating color sets:
 6. **fixCategoryFormulasByName**: Fix formulas in a specific category
 7. **protectFormulaCells**: Apply protection to formula cells (warning or strict mode)
 8. **setupMonthlyTrigger**: Set up automatic monthly sheet creation
+9. **migrateToCategorySummaryRows**: Migrate existing sheet to use category summary rows
 
 ### Monthly Sheet Creation:
 - Triggers: 1st day of each month at 6:00 AM
@@ -280,25 +281,36 @@ Input cells for [Me] and [Wife] rows use alternating color sets:
 9. **Data starts at Row 27**: Control panel is rows 2-26
 10. **Grand Total Row**: Row 26 sums all category totals
 
-## KNOWN LIMITATIONS & FUTURE IMPROVEMENTS
+## CATEGORY SUMMARY ROWS (IMPLEMENTED)
 
-### Current Issue:
-- Control panel formulas (B5, B6, B12, B13) and grand total formulas (Row 26) can become very long with many categories
-- This can cause "Service Spreadsheets failed" errors when formulas exceed ~50,000 characters
+### Solution to Long Formula Problem:
+To prevent "Service Spreadsheets failed" errors from very long formulas, each category now has a **Category Summary Row** after the category total row.
 
-### Planned Solution:
-- Add a **Category Summary Row** after each category total row
-- This row will contain 8 cells:
-  - Column A: "My total for this category" (label)
-  - Column B: Sum of all [Me] rows' Column B in this category
-  - Column C: "Wife's total for this category" (label)
-  - Column D: Sum of all [Wife] rows' Column B in this category
-  - Column E: "My donations for this category" (label)
-  - Column F: Sum of all [Me] rows' donation columns in this category
-  - Column G: "Wife's donations for this category" (label)
-  - Column H: Sum of all [Wife] rows' donation columns in this category
-- Then B5, B6, B12, B13, and Row 26 will sum these summary rows instead of all individual rows
-- This will keep formulas short and manageable
+### Summary Row Structure:
+Each category summary row contains 9 cells:
+- **Column A**: Empty (contains note `[CategorySummary]`)
+- **Column B**: "My total for this category" (label)
+- **Column C**: Sum of all [Me] rows' Column B in this category
+- **Column D**: "Wife's total for this category" (label)
+- **Column E**: Sum of all [Wife] rows' Column B in this category
+- **Column F**: "My donations for this category" (label)
+- **Column G**: Sum of all [Me] rows' donation columns (all 31 days) in this category
+- **Column H**: "Wife's donations for this category" (label)
+- **Column I**: Sum of all [Wife] rows' donation columns (all 31 days) in this category
+
+### Benefits:
+- **Shorter Control Panel Formulas**: B5, B6, B12, B13 now sum summary rows (one term per category) instead of all individual rows
+  - B5 sums Column C from all summary rows (My total)
+  - B6 sums Column E from all summary rows (Wife's total)
+  - B12 sums Column G from all summary rows (My donations)
+  - B13 sums Column I from all summary rows (Wife's donations)
+- **Prevents Formula Length Errors**: Formulas stay well under the 50,000 character limit
+- **Better Performance**: Faster calculation and updates
+- **Easier Debugging**: Can see category-level totals at a glance
+
+### Migration:
+- **New sheets**: Automatically created with summary rows when using `completeSetup` or `addNewCategory`
+- **Existing sheets**: Run `migrateToCategorySummaryRows()` from the menu to add summary rows to existing categories
 
 ## DIAGNOSTIC TOOLS
 

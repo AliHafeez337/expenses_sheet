@@ -449,47 +449,47 @@ function checkCategorySummaryRowFormulas(summaryRow, subcategoryRows, sheet, iss
     wifeRows.push(subcategoryRows[i].wifeRow);
   }
   
-  // Check Column B: My total for this category
+  // Check Column C: My total for this category
   if (meRows.length > 0) {
     var expectedMeTotalTerms = [];
     for (var i = 0; i < meRows.length; i++) {
       expectedMeTotalTerms.push('B' + meRows[i]);
     }
     var expectedMeTotal = '=' + expectedMeTotalTerms.join('+');
-    var actualMeTotal = sheet.getRange(summaryRow, 2).getFormula();
+    var actualMeTotal = sheet.getRange(summaryRow, 3).getFormula();
     if (!formulasAreEquivalent(actualMeTotal, expectedMeTotal)) {
       issues.push({
         type: 'ERROR',
-        location: categoryName + ' Summary Row - My Total (B)',
+        location: categoryName + ' Summary Row - My Total (C)',
         expected: expectedMeTotal,
         actual: actualMeTotal || '(empty)',
         row: summaryRow,
-        col: 2
+        col: 3
       });
     }
   }
   
-  // Check Column D: Wife's total for this category
+  // Check Column E: Wife's total for this category
   if (wifeRows.length > 0) {
     var expectedWifeTotalTerms = [];
     for (var i = 0; i < wifeRows.length; i++) {
       expectedWifeTotalTerms.push('B' + wifeRows[i]);
     }
     var expectedWifeTotal = '=' + expectedWifeTotalTerms.join('+');
-    var actualWifeTotal = sheet.getRange(summaryRow, 4).getFormula();
+    var actualWifeTotal = sheet.getRange(summaryRow, 5).getFormula();
     if (!formulasAreEquivalent(actualWifeTotal, expectedWifeTotal)) {
       issues.push({
         type: 'ERROR',
-        location: categoryName + ' Summary Row - Wife\'s Total (D)',
+        location: categoryName + ' Summary Row - Wife\'s Total (E)',
         expected: expectedWifeTotal,
         actual: actualWifeTotal || '(empty)',
         row: summaryRow,
-        col: 4
+        col: 5
       });
     }
   }
   
-  // Check Column F: My donations for this category
+  // Check Column G: My donations for this category
   if (meRows.length > 0) {
     var expectedMyDonationTerms = [];
     for (var i = 0; i < meRows.length; i++) {
@@ -500,20 +500,20 @@ function checkCategorySummaryRowFormulas(summaryRow, subcategoryRows, sheet, iss
       }
     }
     var expectedMyDonation = '=' + expectedMyDonationTerms.join('+');
-    var actualMyDonation = sheet.getRange(summaryRow, 6).getFormula();
+    var actualMyDonation = sheet.getRange(summaryRow, 7).getFormula();
     if (!formulasAreEquivalent(actualMyDonation, expectedMyDonation)) {
       issues.push({
         type: 'ERROR',
-        location: categoryName + ' Summary Row - My Donations (F)',
+        location: categoryName + ' Summary Row - My Donations (G)',
         expected: expectedMyDonation,
         actual: actualMyDonation || '(empty)',
         row: summaryRow,
-        col: 6
+        col: 7
       });
     }
   }
   
-  // Check Column H: Wife's donations for this category
+  // Check Column I: Wife's donations for this category
   if (wifeRows.length > 0) {
     var expectedWifeDonationTerms = [];
     for (var i = 0; i < wifeRows.length; i++) {
@@ -524,7 +524,7 @@ function checkCategorySummaryRowFormulas(summaryRow, subcategoryRows, sheet, iss
       }
     }
     var expectedWifeDonation = '=' + expectedWifeDonationTerms.join('+');
-    var actualWifeDonation = sheet.getRange(summaryRow, 8).getFormula();
+    var actualWifeDonation = sheet.getRange(summaryRow, 9).getFormula();
     if (!formulasAreEquivalent(actualWifeDonation, expectedWifeDonation)) {
       issues.push({
         type: 'ERROR',
@@ -657,10 +657,10 @@ function checkControlPanelFormulas(sheet, issues) {
   }
   
   // NEW METHOD: Use category summary rows
-  // Check B5: My Monthly Total (sum of all summary rows' Column B)
+  // Check B5: My Monthly Total (sum of all summary rows' Column C)
   var expectedB5Terms = [];
   for (var i = 0; i < summaryRows.length; i++) {
-    expectedB5Terms.push('B' + summaryRows[i]);
+    expectedB5Terms.push('C' + summaryRows[i]);
   }
   var expectedB5 = '=' + expectedB5Terms.join('+');
   var actualB5 = sheet.getRange('B5').getFormula();
@@ -675,10 +675,10 @@ function checkControlPanelFormulas(sheet, issues) {
     });
   }
   
-  // Check B6: Wife's Monthly Total (sum of all summary rows' Column D)
+  // Check B6: Wife's Monthly Total (sum of all summary rows' Column E)
   var expectedB6Terms = [];
   for (var i = 0; i < summaryRows.length; i++) {
-    expectedB6Terms.push('D' + summaryRows[i]);
+    expectedB6Terms.push('E' + summaryRows[i]);
   }
   var expectedB6 = '=' + expectedB6Terms.join('+');
   var actualB6 = sheet.getRange('B6').getFormula();
@@ -693,10 +693,10 @@ function checkControlPanelFormulas(sheet, issues) {
     });
   }
   
-  // Check B12: My Total Donation (sum of all summary rows' Column F)
+  // Check B12: My Total Donation (sum of all summary rows' Column G)
   var expectedB12Terms = [];
   for (var i = 0; i < summaryRows.length; i++) {
-    expectedB12Terms.push('F' + summaryRows[i]);
+    expectedB12Terms.push('G' + summaryRows[i]);
   }
   var expectedB12 = '=' + expectedB12Terms.join('+');
   var actualB12 = sheet.getRange('B12').getFormula();
@@ -711,10 +711,10 @@ function checkControlPanelFormulas(sheet, issues) {
     });
   }
   
-  // Check B13: Wife's Total Donation (sum of all summary rows' Column H)
+  // Check B13: Wife's Total Donation (sum of all summary rows' Column I)
   var expectedB13Terms = [];
   for (var i = 0; i < summaryRows.length; i++) {
-    expectedB13Terms.push('H' + summaryRows[i]);
+    expectedB13Terms.push('I' + summaryRows[i]);
   }
   var expectedB13 = '=' + expectedB13Terms.join('+');
   var actualB13 = sheet.getRange('B13').getFormula();
@@ -1185,25 +1185,25 @@ function fixCategorySummaryRowFormulas(summaryRow, subcategoryRows, sheet) {
     wifeRows.push(subcategoryRows[i].wifeRow);
   }
   
-  // Column B: Sum of all [Me] rows' Column B
+  // Column C: Sum of all [Me] rows' Column B
   if (meRows.length > 0) {
     var meTotalTerms = [];
     for (var i = 0; i < meRows.length; i++) {
       meTotalTerms.push('B' + meRows[i]);
     }
-    sheet.getRange(summaryRow, 2).setFormula('=' + meTotalTerms.join('+'));
+    sheet.getRange(summaryRow, 3).setFormula('=' + meTotalTerms.join('+'));
   }
   
-  // Column D: Sum of all [Wife] rows' Column B
+  // Column E: Sum of all [Wife] rows' Column B
   if (wifeRows.length > 0) {
     var wifeTotalTerms = [];
     for (var i = 0; i < wifeRows.length; i++) {
       wifeTotalTerms.push('B' + wifeRows[i]);
     }
-    sheet.getRange(summaryRow, 4).setFormula('=' + wifeTotalTerms.join('+'));
+    sheet.getRange(summaryRow, 5).setFormula('=' + wifeTotalTerms.join('+'));
   }
   
-  // Column F: Sum of all [Me] rows' donation columns (all 31 days)
+  // Column G: Sum of all [Me] rows' donation columns (all 31 days)
   if (meRows.length > 0) {
     var myDonationTerms = [];
     for (var i = 0; i < meRows.length; i++) {
@@ -1214,11 +1214,11 @@ function fixCategorySummaryRowFormulas(summaryRow, subcategoryRows, sheet) {
       }
     }
     if (myDonationTerms.length > 0) {
-      sheet.getRange(summaryRow, 6).setFormula('=' + myDonationTerms.join('+'));
+      sheet.getRange(summaryRow, 7).setFormula('=' + myDonationTerms.join('+'));
     }
   }
   
-  // Column H: Sum of all [Wife] rows' donation columns (all 31 days)
+  // Column I: Sum of all [Wife] rows' donation columns (all 31 days)
   if (wifeRows.length > 0) {
     var wifeDonationTerms = [];
     for (var i = 0; i < wifeRows.length; i++) {
@@ -1229,7 +1229,7 @@ function fixCategorySummaryRowFormulas(summaryRow, subcategoryRows, sheet) {
       }
     }
     if (wifeDonationTerms.length > 0) {
-      sheet.getRange(summaryRow, 8).setFormula('=' + wifeDonationTerms.join('+'));
+      sheet.getRange(summaryRow, 9).setFormula('=' + wifeDonationTerms.join('+'));
     }
   }
 }

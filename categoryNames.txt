@@ -23,13 +23,13 @@ Transportation: Fuel/Petrol, Car Maintenance, Car Wash, Toll Tax, Parking, Publi
 Utilities & Bills: Electricity Father, Electricity Mother, Gas, Water, Mobile Packages, TV/Cable, Landline/Internet, Other
 
 // Gifts & Charity
-Gifts & Charity: Birthday Gifts, Wedding Gifts, Festival Gifts, Charity/Donations, Zakat, Sadaqah, Other
+Gifts & Charity: Birthday Gifts, Wedding Gifts, Festival Gifts, Charity/Donations, Zakat, Other
 
 // Less Frequent
 Books & Learning: Books, Magazines, Courses, Online Learning, Stationery, Other
 Education: School Fees, Tuition, Uniforms, Transport, School Supplies, Other
 Technology: Electronics, Gadgets, Accessories, Repairs, Software, Apps, Cloud Storage, Other
-Subscriptions: Streaming Services, Online Services, Insurance Premium, Memberships, Other
+Subscriptions: Streaming Services, Online Services, Memberships, Other
 
 // Rare/Occasional
 Miscellaneous: Emergency Expenses, Unexpected, Lost/Damaged Items, Fines/Penalties, Miscellaneous, Other

@@ -121,13 +121,13 @@ function addSubcategoriesToExisting() {
     // Summary row doesn't exist, create it
     sheet.insertRowsAfter(categoryTotalRow, 1);
     categorySummaryRow = categoryTotalRow + 1;
-    sheet.getRange(categorySummaryRow, 1).setValue('My total for this category');
     sheet.getRange(categorySummaryRow, 1).setNote('[CategorySummary]');
-    sheet.getRange(categorySummaryRow, 3).setValue('Wife\'s total for this category');
-    sheet.getRange(categorySummaryRow, 5).setValue('My donations for this category');
-    sheet.getRange(categorySummaryRow, 7).setValue('Wife\'s donations for this category');
+    sheet.getRange(categorySummaryRow, 2).setValue('My total for this category');
+    sheet.getRange(categorySummaryRow, 4).setValue('Wife\'s total for this category');
+    sheet.getRange(categorySummaryRow, 6).setValue('My donations for this category');
+    sheet.getRange(categorySummaryRow, 8).setValue('Wife\'s donations for this category');
     // Format summary row
-    sheet.getRange(categorySummaryRow, 1, 1, 8)
+    sheet.getRange(categorySummaryRow, 1, 1, 9)
       .setBackground('#e8f4f8')
       .setFontWeight('normal')
       .setFontSize(9);
@@ -237,25 +237,25 @@ function applyCategorySummaryRowFormulas(row, sheet) {
     return; // Couldn't find category header
   }
   
-  // Column B: Sum of all [Me] rows' Column B
+  // Column C: Sum of all [Me] rows' Column B
   if (meRows.length > 0) {
     var meTotalTerms = [];
     for (var i = 0; i < meRows.length; i++) {
       meTotalTerms.push('B' + meRows[i]);
     }
-    sheet.getRange(row, 2).setFormula('=' + meTotalTerms.join('+'));
+    sheet.getRange(row, 3).setFormula('=' + meTotalTerms.join('+'));
   }
   
-  // Column D: Sum of all [Wife] rows' Column B
+  // Column E: Sum of all [Wife] rows' Column B
   if (wifeRows.length > 0) {
     var wifeTotalTerms = [];
     for (var i = 0; i < wifeRows.length; i++) {
       wifeTotalTerms.push('B' + wifeRows[i]);
     }
-    sheet.getRange(row, 4).setFormula('=' + wifeTotalTerms.join('+'));
+    sheet.getRange(row, 5).setFormula('=' + wifeTotalTerms.join('+'));
   }
   
-  // Column F: Sum of all [Me] rows' donation columns (all 31 days)
+  // Column G: Sum of all [Me] rows' donation columns (all 31 days)
   if (meRows.length > 0) {
     var myDonationTerms = [];
     for (var i = 0; i < meRows.length; i++) {
@@ -266,11 +266,11 @@ function applyCategorySummaryRowFormulas(row, sheet) {
       }
     }
     if (myDonationTerms.length > 0) {
-      sheet.getRange(row, 6).setFormula('=' + myDonationTerms.join('+'));
+      sheet.getRange(row, 7).setFormula('=' + myDonationTerms.join('+'));
     }
   }
   
-  // Column H: Sum of all [Wife] rows' donation columns (all 31 days)
+  // Column I: Sum of all [Wife] rows' donation columns (all 31 days)
   if (wifeRows.length > 0) {
     var wifeDonationTerms = [];
     for (var i = 0; i < wifeRows.length; i++) {
@@ -567,37 +567,37 @@ function updateControlPanelSummaries() {
   }
   
   // NEW METHOD: Use category summary rows
-  // B5: Sum of all summary rows' Column B (My total for this category)
+  // B5: Sum of all summary rows' Column C (My total for this category)
   var myTotalTerms = [];
   for (var i = 0; i < summaryRows.length; i++) {
-    myTotalTerms.push('B' + summaryRows[i]);
+    myTotalTerms.push('C' + summaryRows[i]);
   }
   if (myTotalTerms.length > 0) {
     sheet.getRange('B5').setFormula('=' + myTotalTerms.join('+'));
   }
   
-  // B6: Sum of all summary rows' Column D (Wife's total for this category)
+  // B6: Sum of all summary rows' Column E (Wife's total for this category)
   var wifeTotalTerms = [];
   for (var i = 0; i < summaryRows.length; i++) {
-    wifeTotalTerms.push('D' + summaryRows[i]);
+    wifeTotalTerms.push('E' + summaryRows[i]);
   }
   if (wifeTotalTerms.length > 0) {
     sheet.getRange('B6').setFormula('=' + wifeTotalTerms.join('+'));
   }
   
-  // B12: Sum of all summary rows' Column F (My donations for this category)
+  // B12: Sum of all summary rows' Column G (My donations for this category)
   var myDonationTerms = [];
   for (var i = 0; i < summaryRows.length; i++) {
-    myDonationTerms.push('F' + summaryRows[i]);
+    myDonationTerms.push('G' + summaryRows[i]);
   }
   if (myDonationTerms.length > 0) {
     sheet.getRange('B12').setFormula('=' + myDonationTerms.join('+'));
   }
   
-  // B13: Sum of all summary rows' Column H (Wife's donations for this category)
+  // B13: Sum of all summary rows' Column I (Wife's donations for this category)
   var wifeDonationTerms = [];
   for (var i = 0; i < summaryRows.length; i++) {
-    wifeDonationTerms.push('H' + summaryRows[i]);
+    wifeDonationTerms.push('I' + summaryRows[i]);
   }
   if (wifeDonationTerms.length > 0) {
     sheet.getRange('B13').setFormula('=' + wifeDonationTerms.join('+'));

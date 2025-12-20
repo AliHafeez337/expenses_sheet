@@ -153,19 +153,26 @@ function parseMonthSheet(sheetName) {
 function clearInputCells(sheet) {
   var lastRow = sheet.getLastRow();
   
-  // FIXED: Changed from row 27 to row 28 (first data row after grand total)
-  for (var row = 28; row <= lastRow; row++) {
-    var note = sheet.getRange(row, 2).getNote();
+  // Clear input cells starting from row 27 (first data row)
+  for (var row = 27; row <= lastRow; row++) {
+    var note = sheet.getRange(row, 1).getNote(); // CHANGED: column 2 to 1
     
     if (note === '[Me]' || note === '[Wife]' || note === '[Comment]') {
       // Clear all day columns for this row
       for (var day = 1; day <= 31; day++) {
-        var baseCol = 3 + (day - 1) * 4 + 1;
+        var baseCol = 3 + (day - 1) * 4; // Day columns start at column 3
         
-        // Clear Personal, Family, Donation columns
-        sheet.getRange(row, baseCol + 1).clearContent();
-        sheet.getRange(row, baseCol + 2).clearContent();
-        sheet.getRange(row, baseCol + 3).clearContent();
+        if (note === '[Me]' || note === '[Wife]') {
+          // Clear Personal, Family, Donation input columns
+          sheet.getRange(row, baseCol + 1).clearContent(); // Personal
+          sheet.getRange(row, baseCol + 2).clearContent(); // Family
+          sheet.getRange(row, baseCol + 3).clearContent(); // Donation
+        } else if (note === '[Comment]') {
+          // Clear comment columns
+          sheet.getRange(row, baseCol + 1).clearContent(); // Personal comment
+          sheet.getRange(row, baseCol + 2).clearContent(); // Family comment
+          sheet.getRange(row, baseCol + 3).clearContent(); // Donation comment
+        }
       }
     }
   }

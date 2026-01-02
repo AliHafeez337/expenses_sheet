@@ -1,7 +1,10 @@
+// ADD THIS CONSTANT AT THE TOP OF YOUR SCRIPT
+var SPREADSHEET_ID = 'PASTE_YOUR_SHEET_ID_HERE';
+
 // Script to automatically create monthly sheets from template
 
 // SETUP INSTRUCTIONS:
-// 1. Make sure your template sheet is named "Template"
+// 1. Make sure your template sheet is named "TEMPLATE"
 // 2. Run setupMonthlyTrigger() once to set up automatic monthly execution
 // 3. The script will run automatically on the 1st of each month at 6:00 AM
 
@@ -21,63 +24,99 @@ function setupMonthlyTrigger() {
     .atHour(6)
     .create();
   
-  SpreadsheetApp.getUi().alert('Monthly trigger set up successfully!\n\nA new sheet will be created automatically on the 1st of each month at 6:00 AM.');
+  Logger.log('Monthly trigger set up successfully!');
+  
+  // Only show UI alert if running manually (not from trigger)
+  try {
+    SpreadsheetApp.getUi().alert('Monthly trigger set up successfully!\n\nA new sheet will be created automatically on the 1st of each month at 6:00 AM.');
+  } catch (e) {
+    // If no UI context (running from trigger), just log it
+    Logger.log('Trigger setup completed from automated context');
+  }
 }
 
 function createMonthlySheetAuto() {
   try {
     createMonthlySheet();
+    Logger.log('Monthly sheet created successfully via trigger');
   } catch (e) {
-    // Send email notification if something goes wrong
-    MailApp.sendEmail({
-      to: Session.getActiveUser().getEmail(),
-      subject: 'Error creating monthly expense sheet',
-      body: 'There was an error creating the monthly expense sheet:\n\n' + e.toString()
-    });
+    // Log the error
+    Logger.log('Error creating monthly sheet: ' + e.toString());
+    
+    // Try to send email notification if something goes wrong
+    try {
+      MailApp.sendEmail({
+        to: Session.getActiveUser().getEmail(),
+        subject: 'Error creating monthly expense sheet',
+        body: 'There was an error creating the monthly expense sheet:\n\n' + e.toString()
+      });
+    } catch (mailError) {
+      Logger.log('Could not send error email: ' + mailError.toString());
+    }
   }
 }
 
 function createMonthlySheetManual() {
-  // For manual testing - just run this function
-  createMonthlySheet();
-  SpreadsheetApp.getUi().alert('Monthly sheet created successfully!');
+  try {
+    createMonthlySheet();
+    SpreadsheetApp.getUi().alert('Monthly sheet created successfully!');
+  } catch (e) {
+    SpreadsheetApp.getUi().alert('Error creating sheet: ' + e.toString());
+  }
 }
 
 function createMonthlySheet() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var templateSheet = ss.getSheetByName('Template');
+  var ss = getSpreadsheet();
+  var templateSheet = ss.getSheetByName('TEMPLATE');
   
   if (!templateSheet) {
-    throw new Error('Template sheet not found! Please create a sheet named "Template".');
+    throw new Error('TEMPLATE sheet not found! Please create a sheet named "TEMPLATE".');
   }
   
-  // Get current month and year
+  // Get current month name only (e.g., "January")
   var now = new Date();
   var monthName = Utilities.formatDate(now, Session.getScriptTimeZone(), 'MMMM');
   
-  // Check if sheet already exists
+  // Check if sheet already exists - JUST MONTH NAME
   if (ss.getSheetByName(monthName)) {
     Logger.log('Sheet "' + monthName + '" already exists. Skipping creation.');
+    SpreadsheetApp.getUi().alert('Sheet "' + monthName + '" already exists!');
     return;
   }
   
   // Duplicate the template
   var newSheet = templateSheet.copyTo(ss);
-  newSheet.setName(monthName);
+  newSheet.setName(monthName); // Just month name, no year
   
-  // Move new sheet to the beginning (after template)
-  ss.moveActiveSheet(2);
+  // Move new sheet to the beginning (after TEMPLATE)
+  var templateIndex = templateSheet.getIndex();
+  ss.setActiveSheet(newSheet);
+  ss.moveActiveSheet(templateIndex + 1);
   
   // Carry forward donation shortfalls from previous month
   carryForwardShortfalls(newSheet, ss);
   
-  // Clear all input cells (Me, Wife, Comment rows)
-  clearInputCells(newSheet);
-  
-  // Update month name in sheet
+  // Update month name in sheet header
   newSheet.getRange('A1').setValue('Expenses - ' + monthName);
   
   Logger.log('Successfully created sheet: ' + monthName);
+  return monthName;
+}
+
+// NEW FUNCTION: Get spreadsheet by ID or active
+function getSpreadsheet() {
+  try {
+    // First try to get active spreadsheet
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    return ss;
+  } catch (e) {
+    // If no active spreadsheet, use the ID
+    if (SPREADSHEET_ID && SPREADSHEET_ID !== 'PASTE_YOUR_SHEET_ID_HERE') {
+      return SpreadsheetApp.openById(SPREADSHEET_ID);
+    } else {
+      throw new Error('Please set your SPREADSHEET_ID in the script or run from an active spreadsheet.');
+    }
+  }
 }
 
 function carryForwardShortfalls(newSheet, ss) {
@@ -95,23 +134,25 @@ function carryForwardShortfalls(newSheet, ss) {
   var myRemainingNeed = previousSheet.getRange('B18').getValue() || 0;
   var wifeRemainingNeed = previousSheet.getRange('B19').getValue() || 0;
   
-  // Set as shortfalls in new sheet (only if positive)
-  newSheet.getRange('B21').setValue(Math.max(0, myRemainingNeed)); // My Previous Shortfall
-  newSheet.getRange('B22').setValue(Math.max(0, wifeRemainingNeed)); // Wife's Previous Shortfall
+  // Set as shortfalls in new sheet
+  // Positive remaining need = under-donated (store as negative, e.g., -5 means $5 shortfall)
+  // Negative remaining need = over-donated (store as positive, e.g., +5 means $5 over-donation)
+  newSheet.getRange('B21').setValue(-myRemainingNeed); // My Previous Shortfall
+  newSheet.getRange('B22').setValue(-wifeRemainingNeed); // Wife's Previous Shortfall
 }
 
 function getPreviousMonthSheet(ss) {
   var sheets = ss.getSheets();
   var monthSheets = [];
   
-  // Find all sheets with month names (exclude Template)
+  // Find all sheets with month names (exclude TEMPLATE)
   for (var i = 0; i < sheets.length; i++) {
     var sheetName = sheets[i].getName();
-    if (sheetName !== 'Template' && isMonthSheet(sheetName)) {
+    if (sheetName !== 'TEMPLATE' && isMonthName(sheetName)) {
       monthSheets.push({
         name: sheetName,
         sheet: sheets[i],
-        date: parseMonthSheet(sheetName)
+        monthIndex: getMonthIndex(sheetName)
       });
     }
   }
@@ -120,34 +161,31 @@ function getPreviousMonthSheet(ss) {
     return null;
   }
   
-  // Sort by date descending
+  // Sort by month index (January=0, February=1, etc.)
   monthSheets.sort(function(a, b) {
-    return b.date.getTime() - a.date.getTime();
+    return b.monthIndex - a.monthIndex;
   });
   
   // Return the most recent month
   return monthSheets[0].sheet;
 }
 
-function isMonthSheet(sheetName) {
-  // Check if sheet name matches "Month Year" pattern
-  var monthPattern = /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/;
-  return monthPattern.test(sheetName);
+function isMonthName(sheetName) {
+  // Check if sheet name is just a month name
+  var months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  return months.includes(sheetName);
 }
 
-function parseMonthSheet(sheetName) {
-  // Parse "Month Year" format into Date object
-  var parts = sheetName.split(' ');
-  var month = parts[0];
-  var year = parseInt(parts[1]);
-  
+function getMonthIndex(monthName) {
   var months = {
     'January': 0, 'February': 1, 'March': 2, 'April': 3,
     'May': 4, 'June': 5, 'July': 6, 'August': 7,
     'September': 8, 'October': 9, 'November': 10, 'December': 11
   };
-  
-  return new Date(year, months[month], 1);
+  return months[monthName];
 }
 
 function clearInputCells(sheet) {
@@ -182,6 +220,30 @@ function clearInputCells(sheet) {
   sheet.getRange('B3').setValue(0); // Wife's Income
 }
 
+// NEW: Custom menu for easy access
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('💰 Monthly Sheets')
+    .addItem('📅 Create This Month\'s Sheet', 'createMonthlySheetManual')
+    .addItem('⏰ Set Up Auto-Creation', 'setupMonthlyTrigger')
+    .addItem('🔍 Check Trigger Status', 'checkTriggerStatus')
+    .addItem('🗑️ Delete Trigger', 'deleteMonthlyTrigger')
+    .addItem('ℹ️ Show Sheet ID', 'showSheetId')
+    .addToUi();
+}
+
+// NEW: Show your Sheet ID
+function showSheetId() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetId = ss.getId();
+  
+  SpreadsheetApp.getUi().alert(
+    'Your Sheet ID:\n\n' + 
+    sheetId + '\n\n' +
+    'Copy this and paste it in the SPREADSHEET_ID variable at the top of the script.'
+  );
+}
+
 // Utility function to check trigger status
 function checkTriggerStatus() {
   var triggers = ScriptApp.getProjectTriggers();
@@ -194,7 +256,7 @@ function checkTriggerStatus() {
       var eventType = triggers[i].getEventType();
       
       SpreadsheetApp.getUi().alert(
-        'Monthly trigger is ACTIVE\n\n' +
+        '✅ Monthly trigger is ACTIVE\n\n' +
         'Function: createMonthlySheetAuto\n' +
         'Runs on: 1st of each month at 6:00 AM\n' +
         'Trigger Source: ' + triggerSource + '\n' +
@@ -206,8 +268,8 @@ function checkTriggerStatus() {
   
   if (!found) {
     SpreadsheetApp.getUi().alert(
-      'No monthly trigger found!\n\n' +
-      'Run setupMonthlyTrigger() to create one.'
+      '❌ No monthly trigger found!\n\n' +
+      'Run "Set Up Auto-Creation" from the menu to create one.'
     );
   }
 }
@@ -225,8 +287,8 @@ function deleteMonthlyTrigger() {
   }
   
   if (deleted) {
-    SpreadsheetApp.getUi().alert('Monthly trigger deleted successfully!');
+    SpreadsheetApp.getUi().alert('✅ Monthly trigger deleted successfully!');
   } else {
-    SpreadsheetApp.getUi().alert('No monthly trigger found to delete.');
+    SpreadsheetApp.getUi().alert('ℹ️ No monthly trigger found to delete.');
   }
 }

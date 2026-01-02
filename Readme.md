@@ -90,9 +90,23 @@ Row Type    | Column A | Column B | Column C | Column D | Column E | Column F |
 
 ### Donation Carry-Over:
 - **My Previous Month Shortfall** (B21): Input/Auto-filled from previous month
+  - Negative (e.g., -5) = under-donated by $5 (needed $5 more)
+  - Positive (e.g., +5) = over-donated by $5 (paid $5 more than needed)
 - **Wife's Previous Month Shortfall** (B22): Input/Auto-filled from previous month
-- **My Adjusted Target** (B24): =MAX(0,B9+(B21/B2)*100)
-- **Wife's Adjusted Target** (B25): =MAX(0,B10+(B22/B3)*100)
+  - Negative (e.g., -5) = under-donated by $5 (needed $5 more)
+  - Positive (e.g., +5) = over-donated by $5 (paid $5 more than needed)
+- **My Adjusted Target** (B24): =B18-B21
+  - This month's remaining need - Previous month's shortfall
+  - Example 1 (under-donated): If this month's remaining is $4, and shortfall is -$5:
+    - Adjusted target = 4 - (-5) = 4 + 5 = $9 (need to donate $9 more)
+  - Example 2 (over-donated): If this month's remaining is $4, and shortfall is +$5:
+    - Adjusted target = 4 - 5 = -$1 (you've already over-donated, no need to donate more)
+- **Wife's Adjusted Target** (B25): =B19-B22
+  - This month's remaining need - Previous month's shortfall
+  - Example 1 (under-donated): If this month's remaining is $4, and shortfall is -$5:
+    - Adjusted target = 4 - (-5) = 4 + 5 = $9 (need to donate $9 more)
+  - Example 2 (over-donated): If this month's remaining is $4, and shortfall is +$5:
+    - Adjusted target = 4 - 5 = -$1 (you've already over-donated, no need to donate more)
 
 ### Grand Total Per Day (Row 26):
 - **Monthly Grand Total** (B26): =SUM(all category totals' Column B)

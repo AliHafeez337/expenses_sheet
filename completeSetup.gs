@@ -435,10 +435,22 @@ function applyControlPanelFormulas() {
   sheet.getRange('B19').setFormula('=(B10*B3/100)-B13');
   
   // MY ADJUSTED TARGET (B24)
-  sheet.getRange('B24').setFormula('=MAX(0,B9+(B21/B2)*100)');
+  // Formula: This month's remaining need - Previous month's shortfall
+  // B18 = This month's remaining need = (B9*B2/100) - B12
+  // B21 = Previous shortfall:
+  //   - Negative (e.g., -5) = under-donated by $5 (need to add it, so subtracting negative adds)
+  //   - Positive (e.g., +5) = over-donated by $5 (need to subtract it)
+  // Result: How much more you need to donate (can be negative if you've over-donated)
+  sheet.getRange('B24').setFormula('=B18-B21');
   
   // WIFE'S ADJUSTED TARGET (B25)
-  sheet.getRange('B25').setFormula('=MAX(0,B10+(B22/B3)*100)');
+  // Formula: This month's remaining need - Previous month's shortfall
+  // B19 = This month's remaining need = (B10*B3/100) - B13
+  // B22 = Previous shortfall:
+  //   - Negative (e.g., -5) = under-donated by $5 (need to add it, so subtracting negative adds)
+  //   - Positive (e.g., +5) = over-donated by $5 (need to subtract it)
+  // Result: How much more you need to donate (can be negative if you've over-donated)
+  sheet.getRange('B25').setFormula('=B19-B22');
   
   // Set placeholder values for B5, B6, B12, B13
   sheet.getRange('B5').setValue(0);
